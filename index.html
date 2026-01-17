@@ -50,17 +50,10 @@
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; }
     .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ddd; }
 
-    .controls {
-      background: var(--bg-card); padding: 20px; border-radius: 12px;
-      display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); align-items: flex-end;
-    }
+    .controls { background: var(--bg-card); padding: 20px; border-radius: 12px; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); align-items: flex-end; }
     .control-group { display: flex; flex-direction: column; gap: 4px; }
     label { font-weight: 600; font-size: 0.85em; color: var(--text-main); opacity: 0.8; }
-    input, select {
-      padding: 8px; border: 1px solid var(--border-color); border-radius: 6px;
-      width: 140px; background: var(--bg-card); color: var(--text-main);
-    }
+    input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; width: 140px; background: var(--bg-card); color: var(--text-main); }
 
     .btn { padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
     .btn-gen  { background: #2ecc71; color: white; }
@@ -68,29 +61,21 @@
     .btn-print{ background: #95a5a6; color: white; }
 
     .calendar-grid { display: grid; gap: 20px; }
-    
-/* Auto-scale wrapper: scales the whole calendar down on small screens */
-#calendar-scale-wrapper {
-  /* “Design width” the layout targets on desktop; matches download width */
-  --calendar-design-width: 1200px;
 
-  width: 100%;
-  display: flex;
-  justify-content: center;    /* keep it centered when scaled */
-  overflow: visible;          /* avoid clipping shadows/edges */
-}
+    /* Auto-scale wrapper: scales the whole calendar down on small screens */
+    #calendar-scale-wrapper {
+      /* “Design width” the layout targets on desktop; matches download width */
+      --calendar-design-width: 1200px;
+      width: 100%;
+      display: flex;
+      justify-content: center;    /* keep it centered when scaled */
+      overflow: visible;          /* avoid clipping shadows/edges */
+    }
+    /* Keep the inner calendar’s max width aligned with the design width */
+    #calendar-scale-wrapper > #calendar { max-width: var(--calendar-design-width); }
 
-/* Keep the inner calendar’s max width aligned with the design width */
-#calendar-scale-wrapper > #calendar {
-  max-width: var(--calendar-design-width);
-}
-
-/* Never scale for printing (full fidelity output) */
-@media print {
-  #calendar-scale-wrapper {
-    transform: none !important;
-  }
-}
+    /* Never scale for printing (full fidelity output) */
+    @media print { #calendar-scale-wrapper { transform: none !important; } }
 
     /* LAYOUTS */
     .layout-standard { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
@@ -113,38 +98,19 @@
     input[type="color"] { padding: 0; height: 38px; cursor: pointer; }
 
     /* ===== THEMES (VISUALS) ===== */
-
-    /* 1) Classic Cards (rounded pills, soft shadows) */
     .theme-standard .month { border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,.08); }
     .theme-standard .day { border-radius: 50%; }
 
-    /* 2) Dense Outline (tight, square cells, outlines) */
     .theme-outline .month { box-shadow: none; border: 1px solid var(--border-color); border-radius: 8px; }
     .theme-outline h3 { color: var(--text-main); background: rgba(0,0,0,0.03); border: none; padding: 10px; border-radius: 6px; }
     .theme-outline .day { border-radius: 4px; border: 1px solid var(--border-color); background: transparent; font-size: 0.8em; }
     .theme-outline .off-day { background: transparent; }
     .theme-outline .weekday-header { color: #777; }
 
-    /* 3) Poster Board (bold gradient header, minimal day chrome) */
-    .theme-poster .month {
-      border-radius: 14px;
-      background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08));
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-    .theme-poster h3 {
-      color: white;
-      margin: -15px -15px 12px -15px;
-      padding: 14px 10px;
-      background: linear-gradient(135deg, var(--on-color), var(--travel-color));
-      border: none;
-    }
+    .theme-poster .month { border-radius: 14px; background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08)); box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; }
+    .theme-poster h3 { color: white; margin: -15px -15px 12px -15px; padding: 14px 10px; background: linear-gradient(135deg, var(--on-color), var(--travel-color)); border: none; }
     .theme-poster .weekday-header { color: #666; font-weight: 700; }
-    .theme-poster .day {
-      border-radius: 0;
-      border: 1px dashed transparent;
-      background: rgba(255,255,255,0.6);
-    }
+    .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
     .theme-poster .off-day { background: rgba(255,255,255,0.3); }
     .theme-poster .today { border-color: #e74c3c !important; }
 
@@ -152,17 +118,8 @@
     @media print {
       .controls, .btn-print, .btn-dark { display: none !important; }
       body { background: white !important; color: black !important; padding: 0 !important; }
-      .calendar-grid {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 5px !important;
-      }
-      .month {
-        border: 1px solid #eee !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
-        font-size: 0.8rem !important; /* fits on one page */
-      }
+      .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+      .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; font-size: 0.8rem !important; /* fits on one page */ }
     }
   </style>
 </head>
@@ -204,23 +161,46 @@
     <button type="button" class="btn btn-dark" onclick="document.body.classList.toggle('dark-mode')">Dark Mode</button>
 
     <button type="button" class="btn btn-print" onclick="window.print()">Print PDF</button>
-    <span style="font-size: 0.75em; opacity: 0.7; margin-left: 6px; color: var(--text-main);">
-      *Enable "Background graphics" in print settings.
-    </span>
+    <span style="font-size: 0.75em; opacity: 0.7; margin-left: 6px; color: var(--text-main);">*Enable "Background graphics" in print settings.</span>
 
     <button type="button" class="btn" style="background: #3498db; color: white;" onclick="downloadCalendar()">Download Image</button>
   </div>
 
-<!-- Fixed-width virtual canvas + a transform wrapper that scales down on small screens -->
-<div id="calendar-scale-wrapper">
-  <div id="calendar" class="calendar-grid"></div>
-</div>
-
+  <!-- Fixed-width virtual canvas + a transform wrapper that scales down on small screens -->
+  <div id="calendar-scale-wrapper">
+    <div id="calendar" class="calendar-grid"></div>
+  </div>
 
   <!-- Load html2canvas BEFORE our inline script (no SRI/crossorigin to avoid blocks) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
+    // ---------- Auto-scale (screen only) ----------
+    let currentScale = 1;
+    function applyAutoScale() {
+      const wrapper = document.getElementById('calendar-scale-wrapper');
+      const calendar = document.getElementById('calendar');
+      if (!wrapper || !calendar) return;
+      const DESIGN_WIDTH = 1200; // keep in sync with CSS --calendar-design-width
+      const wrapperWidth = wrapper.clientWidth || window.innerWidth;
+      const s = Math.min(1, wrapperWidth / DESIGN_WIDTH);
+      if (Math.abs(s - currentScale) > 0.005) {
+        currentScale = s;
+        wrapper.style.transformOrigin = 'top center';
+        wrapper.style.transform = `scale(${s})`;
+      }
+    }
+    function initAutoScale() {
+      applyAutoScale();
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => applyAutoScale());
+        ro.observe(document.getElementById('calendar-scale-wrapper'));
+      } else {
+        window.addEventListener('resize', applyAutoScale);
+      }
+    }
+    // ---------- /Auto-scale ----------
+
     // Color updates
     function updateColors() {
       document.documentElement.style.setProperty('--on-color', document.getElementById('workColor').value);
@@ -277,62 +257,77 @@
         monthDiv.innerHTML = html + `</div>`;
         container.appendChild(monthDiv);
       }
+
+      // Re-apply scaling in case the layout changed
+      requestAnimationFrame(applyAutoScale);
     }
 
-    // Download image (with guards + full restore)
+    // Download image (with guards + full restore + unscaled capture)
     function downloadCalendar() {
       const calendar = document.getElementById('calendar');
+      const wrapper  = document.getElementById('calendar-scale-wrapper');
       const year = getSelectedYear();
 
       // Save original inline styles to restore after capture
       const original = {
+        wrapperTransform: wrapper ? wrapper.style.transform : '',
+        wrapperOrigin: wrapper ? wrapper.style.transformOrigin : '',
         display: calendar.style.display,
         gridTemplateColumns: calendar.style.gridTemplateColumns,
         maxWidth: calendar.style.maxWidth
       };
 
-      // Force 3x4 grid for a reasonable canvas size
+      // 1) Disable screen scaling for a crisp capture
+      if (wrapper) {
+        wrapper.style.transform = 'none';
+        wrapper.style.transformOrigin = '';
+      }
+
+      // 2) Force 3x4 grid for a consistent, readable image
       calendar.style.display = 'grid';
       calendar.style.gridTemplateColumns = 'repeat(3, 1fr)';
       calendar.style.maxWidth = '1200px';
 
       if (!window.html2canvas) {
         alert('Download library is still loading. Please wait a moment and try again.');
-        // Restore original
+        // Restore original + re-apply scale
+        if (wrapper) {
+          wrapper.style.transform = original.wrapperTransform;
+          wrapper.style.transformOrigin = original.wrapperOrigin;
+        }
         calendar.style.display = original.display;
         calendar.style.gridTemplateColumns = original.gridTemplateColumns;
         calendar.style.maxWidth = original.maxWidth;
+        applyAutoScale();
         return;
       }
 
       const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
 
-      try {
-        window.html2canvas(calendar, { scale: 2, useCORS: true, backgroundColor: bg })
-          .then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Shift-Calendar-${year}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          })
-          .catch(err => {
-            console.error('html2canvas failed:', err);
-            alert('Sorry, generating the image failed. See the console for details.');
-          })
-          .finally(() => {
-            // Restore original layout
-            calendar.style.display = original.display;
-            calendar.style.gridTemplateColumns = original.gridTemplateColumns;
-            calendar.style.maxWidth = original.maxWidth;
-          });
-      } catch (e) {
-        console.error('Download error:', e);
-        alert('Unexpected error while preparing the image.');
-        // Restore just in case
-        calendar.style.display = original.display;
-        calendar.style.gridTemplateColumns = original.gridTemplateColumns;
-        calendar.style.maxWidth = original.maxWidth;
-      }
+      window.html2canvas(calendar, { scale: 2, useCORS: true, backgroundColor: bg })
+        .then(canvas => {
+          const link = document.createElement('a');
+          link.download = `Shift-Calendar-${year}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        })
+        .catch(err => {
+          console.error('html2canvas failed:', err);
+          alert('Sorry, generating the image failed. See the console for details.');
+        })
+        .finally(() => {
+          // 3) Restore original styles
+          if (wrapper) {
+            wrapper.style.transform = original.wrapperTransform;
+            wrapper.style.transformOrigin = original.wrapperOrigin;
+          }
+          calendar.style.display = original.display;
+          calendar.style.gridTemplateColumns = original.gridTemplateColumns;
+          calendar.style.maxWidth = original.maxWidth;
+
+          // Re-apply screen scaling after restore
+          applyAutoScale();
+        });
     }
 
     // Minimal Option B: set static titles once (no dynamic year)
@@ -344,6 +339,7 @@
 
     // Initial render
     generateCalendar();
+    initAutoScale();
   </script>
 </body>
 </html>
