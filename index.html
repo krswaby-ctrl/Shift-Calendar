@@ -129,19 +129,20 @@
                 for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
                 const date = new Date(2026, m, 1);
                 while (date.getMonth() === m) {
-                    const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
-                    let pos = diff % cycle; if (pos < 0) pos += cycle;
-                    let type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
-                    const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
-                    html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
-                    date.setDate(date.getDate() + 1);
-                }
-                monthDiv.innerHTML = html + `</div>`;
-                container.appendChild(monthDiv);
-            }
+const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
+            let pos = diff % cycle;
+            if (pos < 0) pos += cycle;
+            let type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
+            const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
+            html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
+            date.setDate(date.getDate() + 1);
         }
-        generateCalendar();
-        function downloadCalendar() {
+        monthDiv.innerHTML = html + `</div>`;
+        container.appendChild(monthDiv);
+    }
+}
+
+function downloadCalendar() {
     const calendar = document.getElementById('calendar');
     html2canvas(calendar, { 
         scale: 2,
@@ -154,13 +155,11 @@
         link.click();
     });
 }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-     </script>
+generateCalendar();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
-
-
-
 
 
 
