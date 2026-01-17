@@ -53,39 +53,35 @@
     .btn-dark { background: #34495e; color: white; }
     .btn-print{ background: #95a5a6; color: white; }
 
-    .calendar-grid { display: grid; gap: 20px; }
+    /* ===== GRID CONTAINER (screen) ===== */
+    .calendar-grid { display: grid; gap: 20px; --month-min: 320px; }
 
-    /* Auto-scale wrapper: scales the whole calendar down on small screens */
+    /* Option A: Use minmax for ALL layouts so months scale consistently */
+    .layout-standard {
+      --month-min: 340px;                  /* classic: a touch larger */
+      grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr));
+      gap: 20px;
+    }
+    .layout-compact {                      /* Dense Outline */
+      --month-min: 320px;                  /* responsive like classic */
+      grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr));
+      gap: 12px;                           /* tighter look */
+    }
+    .layout-poster {                       /* Poster Board */
+      --month-min: 360px;                  /* roomier cards */
+      grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr));
+      gap: 24px;
+    }
+
+    /* ===== AUTO-SCALE WRAPPER (screen only) ===== */
     #calendar-scale-wrapper {
-      /* Desktop design width for main view */
-      --calendar-design-width: 1600px; /* bumped from 1400 */
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      overflow: visible;
+      --calendar-design-width: 1600px; /* desktop design width */
+      width: 100%; display: flex; justify-content: center; overflow: visible;
     }
     /* IMPORTANT: literal child combinator (not escaped) */
     #calendar-scale-wrapper > #calendar { max-width: var(--calendar-design-width); }
 
-    /* Never scale for printing (full fidelity output) */
-    @media print { #calendar-scale-wrapper { transform: none !important; } }
-
-    /* LAYOUTS */
-    .layout-standard { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-    .layout-compact  { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    /* Poster Board: wider on desktop */
-    .layout-poster   { grid-template-columns: repeat(3, 1fr); gap: 24px; }
-
-    /* Responsive columns for Dense Outline (layout-compact) */
-    @media (max-width: 1200px) { .layout-compact { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 900px)  { .layout-compact { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px)  { .layout-compact { grid-template-columns: 1fr; } }
-
-    /* Poster Board step down */
-    @media (max-width: 1200px) { .layout-poster { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 900px)  { .layout-poster { grid-template-columns: 1fr; } }
-
-    /* BASE MONTH CARD */
+    /* ===== BASE MONTH CARD ===== */
     .month { background: var(--bg-card); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; }
     h3 { text-align: center; color: var(--on-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0; }
 
@@ -110,25 +106,14 @@
     .theme-outline .off-day { background: transparent; }
     .theme-outline .weekday-header { color: #777; }
 
-    .theme-poster .month {
-      border-radius: 14px;
-      background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08));
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-    .theme-poster h3 {
-      color: white;
-      margin: -15px -15px 12px -15px;
-      padding: 14px 10px;
-      background: linear-gradient(135deg, var(--on-color), var(--travel-color));
-      border: none;
-    }
+    .theme-poster .month { border-radius: 14px; background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08)); box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; }
+    .theme-poster h3 { color: white; margin: -15px -15px 12px -15px; padding: 14px 10px; background: linear-gradient(135deg, var(--on-color), var(--travel-color)); border: none; }
     .theme-poster .weekday-header { color: #666; font-weight: 700; }
     .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
     .theme-poster .off-day { background: rgba(255,255,255,0.3); }
     .theme-poster .today { border-color: #e74c3c !important; }
 
-    /* Print */
+    /* ===== PRINT (unchanged 3×4 grid) ===== */
     @media print {
       @page { size: auto; margin: 0.25in; }
       .controls, .btn-print, .btn-dark { display: none !important; }
@@ -234,7 +219,6 @@
         setIf('workColor', LS_KEYS.work);
         setIf('travelColor', LS_KEYS.travel);
         const cap = localStorage.getItem(LS_KEYS.capture); if (cap && document.getElementById('captureWidth')) document.getElementById('captureWidth').value = cap;
-        // Dark mode preference
         const dark = localStorage.getItem(LS_KEYS.dark); if (dark === '1') document.body.classList.add('dark-mode');
       } catch (e) { /* ignore */ }
     }
@@ -305,9 +289,9 @@
 
         const first = new Date(year, m, 1);
         let html = `<h3>${first.toLocaleString('default', { month: 'long' })}</h3>`;
-        html += `<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
+        html += `<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`;
 
-        for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
+        for (let i = 0; i < first.getDay(); i++) html += `<div class=\"day empty\"></div>`;
 
         const date = new Date(year, m, 1);
         while (date.getMonth() === m) {
@@ -315,7 +299,7 @@
           let pos = diff % cycle; if (pos < 0) pos += cycle;
           const type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
           const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
-          html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
+          html += `<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`;
           date.setDate(date.getDate() + 1);
         }
 
@@ -323,7 +307,6 @@
         container.appendChild(monthDiv);
       }
 
-      // Save current selection to localStorage and re-apply scaling
       saveSettings();
       requestAnimationFrame(applyAutoScale);
     }
