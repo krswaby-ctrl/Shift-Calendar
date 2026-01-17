@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
 
-  <!-- Keep your existing icon + manifest links (as requested) -->
+  <!-- Icons/manifest -->
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,399 +13,239 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    :root {
-      --on-color: #3498db;
-      --travel-color: #e67e22;
-      --off-color: #ffffff;
-      --text-main: #333;
-      --bg-body: #f0f2f5;
-      --bg-card: #ffffff;
-      --border-color: #eee;
+    :root { --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff; --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee; }
+    body.dark-mode { --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d; --border-color:#444; }
+    body { font-family:'Segoe UI',system-ui,sans-serif; padding:20px; background:var(--bg-body); color:var(--text-main); margin:0; transition:background .3s,color .3s; }
+
+    /* Header: 3-column grid so name is centered between title and legend */
+    .header-container { display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:16px; margin-bottom: 14px; }
+    #pageTitle { justify-self:start; margin:0; }
+    .legend { justify-self:end; display:flex; gap:15px; background:var(--bg-card); padding:10px 15px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .legend-item{ display:flex; align-items:center; gap:6px; font-size:.85em; font-weight:600; }
+    .dot{ width:12px; height:12px; border-radius:50%; border:1px solid #ddd; }
+
+    /* Name chip shown inline in the header (center cell) */
+    #nameInlineWrap{ justify-self:center; }
+    .name-chip{ display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px; background:linear-gradient(135deg,var(--on-color),var(--travel-color)); color:#fff; font-weight:700; letter-spacing:.2px; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+    .name-chip .label{ opacity:.9; font-weight:600; font-size:.9rem; }
+    .name-chip .value{ font-size:1.05rem; }
+    #nameInline{ display:none; }
+
+    /* Controls */
+    .controls{ background:var(--bg-card); padding:20px; border-radius:12px; display:flex; gap:15px; flex-wrap:wrap; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,.1); align-items:flex-end; }
+    .control-group{ display:flex; flex-direction:column; gap:4px; }
+    label{ font-weight:600; font-size:.85em; color:var(--text-main); opacity:.8; }
+    input,select{ padding:8px; border:1px solid var(--border-color); border-radius:6px; width:200px; max-width:48vw; background:var(--bg-card); color:var(--text-main); }
+    .btn{ padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:bold; border:none; transition:.2s; }
+    .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; } .btn-print{ background:#95a5a6; color:#fff; }
+
+    /* Grid container (Option A responsive) */
+    .calendar-grid{ display:grid; gap:20px; --month-min:320px; }
+    .layout-standard{ --month-min:340px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:20px; }
+    .layout-compact{ --month-min:320px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:12px; }
+    .layout-poster{ --month-min:360px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:24px; }
+
+    /* Auto-scale wrapper (screen) */
+    #calendar-scale-wrapper{ --calendar-design-width:1600px; width:100%; display:flex; justify-content:center; overflow:visible; }
+    #calendar-scale-wrapper > #calendar{ max-width:var(--calendar-design-width); }
+
+    /* Month card */
+    .month{ background:var(--bg-card); border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); padding:15px; }
+    h3{ text-align:center; color:var(--on-color); border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-top:0; }
+    .weekday-header,.days{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; }
+    .weekday-header{ font-weight:bold; color:#999; font-size:.75em; margin-bottom:8px; }
+    .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:.85em; border:1px solid transparent; }
+    .on-shift{ background:var(--on-color)!important; color:#fff; font-weight:bold; }
+    .travel-day{ background:var(--travel-color)!important; color:#fff; font-weight:bold; }
+    .off-day{ background:var(--off-color); color:var(--text-main); border-color:var(--border-color); }
+    .today{ border:2px solid #e74c3c!important; }
+    .empty{ visibility:hidden; }
+    input[type=color]{ padding:0; height:38px; cursor:pointer; }
+
+    /* Themes */
+    .theme-standard .month{ border-radius:12px; box-shadow:0 3px 10px rgba(0,0,0,.08); }
+    .theme-standard .day{ border-radius:50%; }
+    .theme-outline .month{ box-shadow:none; border:1px solid var(--border-color); border-radius:8px; }
+    .theme-outline h3{ color:var(--text-main); background:rgba(0,0,0,.03); border:none; padding:10px; border-radius:6px; }
+    .theme-outline .day{ border-radius:4px; border:1px solid var(--border-color); background:transparent; font-size:.8em; }
+    .theme-outline .off-day{ background:transparent; }
+    .theme-outline .weekday-header{ color:#777; }
+    .theme-poster .month{ border-radius:14px; background:linear-gradient(145deg,rgba(52,152,219,.08),rgba(230,126,34,.08)); box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
+    .theme-poster h3{ color:#fff; margin:-15px -15px 12px -15px; padding:14px 10px; background:linear-gradient(135deg,var(--on-color),var(--travel-color)); border:none; }
+    .theme-poster .weekday-header{ color:#666; font-weight:700; }
+    .theme-poster .day{ border-radius:0; border:1px dashed transparent; background:rgba(255,255,255,.6); }
+    .theme-poster .off-day{ background:rgba(255,255,255,.3); }
+    .theme-poster .today{ border-color:#e74c3c!important; }
+
+    /* Print */
+    @media print{
+      @page{ size:auto; margin:0.25in; }
+      .controls,.btn-print,.btn-dark{ display:none!important; }
+      #calendar-scale-wrapper{ transform:none!important; width:100%!important; }
+      #calendar-scale-wrapper > #calendar{ width:100%!important; max-width:none!important; }
+      body{ background:#fff!important; color:#000!important; padding:0!important; }
+      .calendar-grid{ display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:8px!important; }
+      .month{ border:1px solid #ddd!important; box-shadow:none!important; page-break-inside:avoid; padding:10px!important; font-size:.9rem!important; background:#fff!important; }
+      .weekday-header{ color:#666!important; }
+      /* Name: show only typed value, no chip chrome */
+      .name-chip{ background:transparent!important; color:#000!important; box-shadow:none!important; padding:0!important; }
+      .name-chip .label{ display:none!important; }
+      .name-chip .value{ font-weight:700!important; }
     }
-    body.dark-mode {
-      --off-color: #2c3e50;
-      --text-main: #ecf0f1;
-      --bg-body: #1a1a1a;
-      --bg-card: #2d2d2d;
-      --border-color: #444;
-    }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      padding: 20px;
-      background: var(--bg-body);
-      color: var(--text-main);
-      margin: 0;
-      transition: background 0.3s, color 0.3s;
-    }
 
-    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    .legend { display: flex; gap: 15px; background: var(--bg-card); padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ddd; }
-
-    .controls { background: var(--bg-card); padding: 20px; border-radius: 12px; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); align-items: flex-end; }
-    .control-group { display: flex; flex-direction: column; gap: 4px; }
-    label { font-weight: 600; font-size: 0.85em; color: var(--text-main); opacity: 0.8; }
-    input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; width: 200px; max-width: 48vw; background: var(--bg-card); color: var(--text-main); }
-
-    .btn { padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
-    .btn-gen  { background: #2ecc71; color: white; }
-    .btn-dark { background: #34495e; color: white; }
-    .btn-print{ background: #95a5a6; color: white; }
-
-    /* ===== GRID CONTAINER (screen) ===== */
-    .calendar-grid { display: grid; gap: 20px; --month-min: 320px; }
-
-    /* Option A: Use minmax for ALL layouts so months scale consistently */
-    .layout-standard { --month-min: 340px; grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr)); gap: 20px; }
-    .layout-compact  { --month-min: 320px; grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr)); gap: 12px; }
-    .layout-poster   { --month-min: 360px; grid-template-columns: repeat(auto-fit, minmax(var(--month-min), 1fr)); gap: 24px; }
-
-    /* ===== AUTO-SCALE WRAPPER (screen only) ===== */
-    #calendar-scale-wrapper { --calendar-design-width: 1600px; width: 100%; display: flex; justify-content: center; overflow: visible; }
-    #calendar-scale-wrapper > #calendar { max-width: var(--calendar-design-width); }
-
-    /* ===== NAME BANNER (optional) ===== */
-    #nameBanner { display: none; margin: 8px 0 14px; text-align: left; }
-    .name-chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, var(--on-color), var(--travel-color)); color: #fff; font-weight: 700; letter-spacing: .2px; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
-    .name-chip .label { opacity: .9; font-weight: 600; font-size: .9rem; }
-    .name-chip .value { font-size: 1.05rem; }
-
-    /* ===== BASE MONTH CARD ===== */
-    .month { background: var(--bg-card); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; }
-    h3 { text-align: center; color: var(--on-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0; }
-
-    .weekday-header, .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
-    .weekday-header { font-weight: bold; color: #999; font-size: 0.75em; margin-bottom: 8px; }
-    .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.85em; border: 1px solid transparent; }
-    .on-shift   { background: var(--on-color) !important; color: white; font-weight: bold; }
-    .travel-day { background: var(--travel-color) !important; color: white; font-weight: bold; }
-    .off-day    { background: var(--off-color); color: var(--text-main); border-color: var(--border-color); }
-    .today      { border: 2px solid #e74c3c !important; }
-    .empty { visibility: hidden; }
-
-    input[type="color"] { padding: 0; height: 38px; cursor: pointer; }
-
-    /* ===== THEMES (VISUALS) ===== */
-    .theme-standard .month { border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,.08); }
-    .theme-standard .day { border-radius: 50%; }
-
-    .theme-outline .month { box-shadow: none; border: 1px solid var(--border-color); border-radius: 8px; }
-    .theme-outline h3 { color: var(--text-main); background: rgba(0,0,0,0.03); border: none; padding: 10px; border-radius: 6px; }
-    .theme-outline .day { border-radius: 4px; border: 1px solid var(--border-color); background: transparent; font-size: 0.8em; }
-    .theme-outline .off-day { background: transparent; }
-    .theme-outline .weekday-header { color: #777; }
-
-    .theme-poster .month { border-radius: 14px; background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08)); box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; }
-    .theme-poster h3 { color: white; margin: -15px -15px 12px -15px; padding: 14px 10px; background: linear-gradient(135deg, var(--on-color), var(--travel-color)); border: none; }
-    .theme-poster .weekday-header { color: #666; font-weight: 700; }
-    .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
-    .theme-poster .off-day { background: rgba(255,255,255,0.3); }
-    .theme-poster .today { border-color: #e74c3c !important; }
-
-    /* ===== PRINT (3×4 grid, keep banner/title) ===== */
-    @media print {
-      @page { size: auto; margin: 0.25in; }
-      .controls, .btn-print, .btn-dark { display: none !important; }
-      #calendar-scale-wrapper { transform: none !important; width: 100% !important; }
-      #calendar-scale-wrapper > #calendar { width: 100% !important; max-width: none !important; }
-      body { background: white !important; color: black !important; padding: 0 !important; }
-      .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
-      .month { border: 1px solid #ddd !important; box-shadow: none !important; page-break-inside: avoid; padding: 10px !important; font-size: 0.9rem !important; background: white !important; }
-      .weekday-header { color: #666 !important; }
-      /* Always show the banner in print if a name is set */
-      #nameBanner { display: block !important; }
-    }
+    /* Small screens: stack header items */
+    @media (max-width: 700px){ .header-container{ grid-template-columns: 1fr; justify-items:center; text-align:center; gap:10px; } #pageTitle{ justify-self:center; } .legend{ justify-self:center; } }
   </style>
 </head>
 <body>
-  <div class="header-container">
-    <h2 id="pageTitle">North Slope Shift Calendar</h2>
-    <div class="legend">
-      <div class="legend-item"><div class="dot" style="background: var(--on-color);"></div> Work</div>
-      <div class="legend-item"><div class="dot" style="background: var(--travel-color);"></div> Travel</div>
-      <div class="legend-item"><div class="dot" style="background: var(--off-color);"></div> Off</div>
-    </div>
-  </div>
 
-  <div class="controls">
-    <div class="control-group">
-      <label for="yearSelect">Year</label>
-      <input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()">
-    </div>
-    <div class="control-group">
-      <label for="daysOn">Days ON</label>
-      <input type="number" id="daysOn" min="1" step="1" value="21">
-    </div>
-    <div class="control-group">
-      <label for="daysOff">Days OFF</label>
-      <input type="number" id="daysOff" min="1" step="1" value="21">
-    </div>
-    <div class="control-group">
-      <label for="startDate">1st Day ON</label>
-      <input type="date" id="startDate" value="2026-01-08">
-    </div>
-
-    <div class="control-group">
-      <label for="layoutStyle">Style</label>
-      <select id="layoutStyle" onchange="generateCalendar()">
-        <option value="layout-standard theme-standard">Classic Cards</option>
-        <option value="layout-compact theme-outline">Dense Outline</option>
-        <option value="layout-poster theme-poster">Poster Board</option>
-      </select>
-    </div>
-
-    <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()" aria-label="Work color"></div>
-    <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()" aria-label="Travel color"></div>
-
-    <div class="control-group">
-      <label for="nameField">Name (optional)</label>
-      <input type="text" id="nameField" placeholder="e.g., Keith Swaby" oninput="handleNameInput()" maxlength="80">
-    </div>
-
-    <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
-    <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
-
-    <button type="button" class="btn btn-print" onclick="window.print()">Print PDF</button>
-    <span style="font-size: 0.75em; opacity: 0.7; margin-left: 6px; color: var(--text-main);">*Enable "Background graphics" in print settings.</span>
-
-    <button type="button" class="btn" style="background: #3498db; color: white;" onclick="downloadCalendar()">Download Image</button>
-
-    <!-- Hidden capture width knob (per-device, not shared) -->
-    <input type="hidden" id="captureWidth" value="1800">
-
-    <!-- Reset to Defaults -->
-    <button type="button" class="btn" style="background:#e74c3c;color:white;" onclick="resetSettings()">Reset Defaults</button>
-  </div>
-
-  <!-- Capture root wraps the optional banner + calendar so both appear in print & download -->
+  <!-- Capture root = header (with centered name) + calendar, so print & download get both -->
   <div id="calendar-capture-root">
-    <div id="nameBanner" aria-hidden="true">
-      <div class="name-chip"><span class="label">Name:</span><span class="value" id="nameBannerText"></span></div>
+    <div class="header-container">
+      <h2 id="pageTitle">North Slope Shift Calendar</h2>
+      <div id="nameInlineWrap">
+        <div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
+        <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
+        <div class="legend-item"><div class="dot" style="background:var(--off-color);"></div> Off</div>
+      </div>
     </div>
+
+    <div class="controls">
+      <div class="control-group"><label for="yearSelect">Year</label><input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()"></div>
+      <div class="control-group"><label for="daysOn">Days ON</label><input type="number" id="daysOn" min="1" step="1" value="21"></div>
+      <div class="control-group"><label for="daysOff">Days OFF</label><input type="number" id="daysOff" min="1" step="1" value="21"></div>
+      <div class="control-group"><label for="startDate">1st Day ON</label><input type="date" id="startDate" value="2026-01-08"></div>
+      <div class="control-group"><label for="layoutStyle">Style</label>
+        <select id="layoutStyle" onchange="generateCalendar()">
+          <option value="layout-standard theme-standard">Classic Cards</option>
+          <option value="layout-compact theme-outline">Dense Outline</option>
+          <option value="layout-poster theme-poster">Poster Board</option>
+        </select>
+      </div>
+      <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()" aria-label="Work color"></div>
+      <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()" aria-label="Travel color"></div>
+      <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Your name" oninput="handleNameInput()" maxlength="80"></div>
+      <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
+      <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
+      <button type="button" class="btn btn-print" onclick="window.print()">Print PDF</button>
+      <span style="font-size:.75em;opacity:.7;margin-left:6px;color:var(--text-main);">*Enable "Background graphics" in print settings.</span>
+      <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendar()">Download Image</button>
+      <input type="hidden" id="captureWidth" value="2000">
+      <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
+    </div>
+
     <div id="calendar-scale-wrapper">
       <div id="calendar" class="calendar-grid"></div>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
   <script>
-    /* ========= Local Storage (per browser, per user) ========= */
-    const LS_KEYS = {
-      year: 'sc_year', on: 'sc_daysOn', off: 'sc_daysOff', start: 'sc_start',
-      style: 'sc_style', work: 'sc_workColor', travel: 'sc_travelColor', dark: 'sc_darkMode',
-      capture: 'sc_captureWidth', name: 'sc_name'
-    };
+    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name' };
 
-    function saveSettings() {
-      try {
-        localStorage.setItem(LS_KEYS.year, document.getElementById('yearSelect').value);
-        localStorage.setItem(LS_KEYS.on, document.getElementById('daysOn').value);
-        localStorage.setItem(LS_KEYS.off, document.getElementById('daysOff').value);
-        localStorage.setItem(LS_KEYS.start, document.getElementById('startDate').value);
-        localStorage.setItem(LS_KEYS.style, document.getElementById('layoutStyle').value);
-        localStorage.setItem(LS_KEYS.work, document.getElementById('workColor').value);
-        localStorage.setItem(LS_KEYS.travel, document.getElementById('travelColor').value);
-        localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1' : '0');
-        const cap = document.getElementById('captureWidth'); if (cap) localStorage.setItem(LS_KEYS.capture, cap.value);
-        const nm = document.getElementById('nameField'); if (nm) localStorage.setItem(LS_KEYS.name, nm.value.trim());
-      } catch (e) { /* ignore quota errors */ }
+    function saveSettings(){ try{
+      localStorage.setItem(LS_KEYS.year, document.getElementById('yearSelect').value);
+      localStorage.setItem(LS_KEYS.on, document.getElementById('daysOn').value);
+      localStorage.setItem(LS_KEYS.off, document.getElementById('daysOff').value);
+      localStorage.setItem(LS_KEYS.start, document.getElementById('startDate').value);
+      localStorage.setItem(LS_KEYS.style, document.getElementById('layoutStyle').value);
+      localStorage.setItem(LS_KEYS.work, document.getElementById('workColor').value);
+      localStorage.setItem(LS_KEYS.travel, document.getElementById('travelColor').value);
+      localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0');
+      const cap=document.getElementById('captureWidth'); if(cap) localStorage.setItem(LS_KEYS.capture, cap.value);
+      const nm=document.getElementById('nameField'); if(nm) localStorage.setItem(LS_KEYS.name, nm.value.trim());
+    }catch(e){} }
+
+    function loadSettings(){ try{
+      const setIf=(id,key)=>{ const v=localStorage.getItem(key); if(v) document.getElementById(id).value=v; };
+      setIf('yearSelect',LS_KEYS.year); setIf('daysOn',LS_KEYS.on); setIf('daysOff',LS_KEYS.off); setIf('startDate',LS_KEYS.start);
+      setIf('layoutStyle',LS_KEYS.style); setIf('workColor',LS_KEYS.work); setIf('travelColor',LS_KEYS.travel); setIf('nameField',LS_KEYS.name);
+      const cap=localStorage.getItem(LS_KEYS.capture); if(cap) document.getElementById('captureWidth').value=cap;
+      if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
+    }catch(e){} }
+
+    function handleNameInput(){ updateNameInline(); saveSettings(); }
+    function updateNameInline(){
+      const val=(document.getElementById('nameField').value||'').trim();
+      const wrap=document.getElementById('nameInline');
+      const text=document.getElementById('nameInlineText');
+      if(val){ text.textContent=val; wrap.style.display='inline-flex'; wrap.setAttribute('aria-hidden','false'); }
+      else{ text.textContent=''; wrap.style.display='none'; wrap.setAttribute('aria-hidden','true'); }
     }
 
-    function loadSettings() {
-      try {
-        const setIf = (id, key) => { const v = localStorage.getItem(key); if (v) document.getElementById(id).value = v; };
-        setIf('yearSelect', LS_KEYS.year);
-        setIf('daysOn', LS_KEYS.on);
-        setIf('daysOff', LS_KEYS.off);
-        setIf('startDate', LS_KEYS.start);
-        setIf('layoutStyle', LS_KEYS.style);
-        setIf('workColor', LS_KEYS.work);
-        setIf('travelColor', LS_KEYS.travel);
-        setIf('nameField', LS_KEYS.name);
-        const cap = localStorage.getItem(LS_KEYS.capture); if (cap && document.getElementById('captureWidth')) document.getElementById('captureWidth').value = cap;
-        const dark = localStorage.getItem(LS_KEYS.dark); if (dark === '1') document.body.classList.add('dark-mode');
-      } catch (e) { /* ignore */ }
-    }
+    function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+      document.getElementById('yearSelect').value=new Date().getFullYear(); document.getElementById('daysOn').value=21; document.getElementById('daysOff').value=21;
+      document.getElementById('startDate').value='2026-01-08'; document.getElementById('layoutStyle').value='layout-standard theme-standard';
+      document.getElementById('workColor').value='#3498db'; document.getElementById('travelColor').value='#e67e22'; document.getElementById('captureWidth').value='2000';
+      document.getElementById('nameField').value=''; document.body.classList.remove('dark-mode');
+      updateColors(); updateNameInline(); generateCalendar(); applyAutoScale(); saveSettings(); }
 
-    /* ========= Name Banner ========= */
-    function handleNameInput() { updateNameBanner(); saveSettings(); }
-    function updateNameBanner() {
-      const name = (document.getElementById('nameField').value || '').trim();
-      const banner = document.getElementById('nameBanner');
-      const textEl = document.getElementById('nameBannerText');
-      if (name) {
-        textEl.textContent = name;
-        banner.style.display = 'block';
-        banner.setAttribute('aria-hidden', 'false');
-      } else {
-        textEl.textContent = '';
-        banner.style.display = 'none';
-        banner.setAttribute('aria-hidden', 'true');
-      }
-    }
+    let currentScale=1;
+    function updateColors(){ document.documentElement.style.setProperty('--on-color',document.getElementById('workColor').value); document.documentElement.style.setProperty('--travel-color',document.getElementById('travelColor').value); }
+    function applyAutoScale(){ const w=document.getElementById('calendar-scale-wrapper'), c=document.getElementById('calendar'); if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
+    function initAutoScale(){ applyAutoScale(); if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(document.getElementById('calendar-scale-wrapper')); } else { window.addEventListener('resize',applyAutoScale); } }
+    function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
 
-    /* ========= Reset to Defaults ========= */
-    function resetSettings() {
-      if (!confirm('Reset all settings to defaults?')) return;
-      try { Object.values(LS_KEYS).forEach(key => localStorage.removeItem(key)); } catch (e) {}
+    function getSelectedYear(){ const y=parseInt(document.getElementById('yearSelect').value,10); return Number.isFinite(y)?y:(new Date()).getFullYear(); }
+    function handleYearChange(){ generateCalendar(); saveSettings(); }
 
-      document.getElementById('yearSelect').value = new Date().getFullYear();
-      document.getElementById('daysOn').value = 21;
-      document.getElementById('daysOff').value = 21;
-      document.getElementById('startDate').value = '2026-01-08';
-      document.getElementById('layoutStyle').value = 'layout-standard theme-standard';
-      document.getElementById('workColor').value = '#3498db';
-      document.getElementById('travelColor').value = '#e67e22';
-      const cap = document.getElementById('captureWidth'); if (cap) cap.value = '1800';
-      const nm = document.getElementById('nameField'); if (nm) nm.value = '';
-      document.body.classList.remove('dark-mode');
+    function generateCalendar(){ const daysOn=parseInt(document.getElementById('daysOn').value,10)||21; const daysOff=parseInt(document.getElementById('daysOff').value,10)||21; const startInput=document.getElementById('startDate').value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=document.getElementById('layoutStyle').value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=document.getElementById('calendar'); container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=daysOn+daysOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===daysOn)?'travel-day': (pos>0&&pos<daysOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-      updateColors();
-      updateNameBanner();
-      generateCalendar();
-      applyAutoScale();
-      saveSettings();
-    }
+    function downloadCalendar(){
+      const year=getSelectedYear();
+      const bg=document.body.classList.contains('dark-mode')?'#1a1a1a':'#ffffff';
+      const CAPTURE_WIDTH=parseInt(document.getElementById('captureWidth')?.value||'2000',10);
 
-    /* ========= Colors & Autoscale ========= */
-    let currentScale = 1;
-    function updateColors() {
-      document.documentElement.style.setProperty('--on-color', document.getElementById('workColor').value);
-      document.documentElement.style.setProperty('--travel-color', document.getElementById('travelColor').value);
-    }
+      const liveRoot=document.getElementById('calendar-capture-root');
+      const cloneRoot=liveRoot.cloneNode(true);
 
-    function applyAutoScale() {
-      const wrapper = document.getElementById('calendar-scale-wrapper');
-      const calendar = document.getElementById('calendar');
-      if (!wrapper || !calendar) return;
-      const DESIGN_WIDTH = 1600; // keep in sync with CSS
-      const wrapperWidth = wrapper.clientWidth || window.innerWidth;
-      const s = Math.min(1, wrapperWidth / DESIGN_WIDTH);
-      if (Math.abs(s - currentScale) > 0.005) {
-        currentScale = s;
-        wrapper.style.transformOrigin = 'top center';
-        wrapper.style.transform = `scale(${s})`;
-      }
-    }
+      /* Make the name appear as plain text: remove label, neutralize styles */
+      cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
+      const chip=cloneRoot.querySelector('.name-chip');
+      if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
 
-    function initAutoScale() {
-      applyAutoScale();
-      if (window.ResizeObserver) {
-        const ro = new ResizeObserver(() => applyAutoScale());
-        ro.observe(document.getElementById('calendar-scale-wrapper'));
-      } else {
-        window.addEventListener('resize', applyAutoScale);
-      }
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-      saveSettings();
-    }
-
-    /* ========= Year / Generation ========= */
-    function getSelectedYear() {
-      const y = parseInt(document.getElementById('yearSelect').value, 10);
-      return Number.isFinite(y) ? y : (new Date()).getFullYear();
-    }
-    function handleYearChange() { generateCalendar(); saveSettings(); }
-
-    function generateCalendar() {
-      const daysOn  = parseInt(document.getElementById('daysOn').value, 10)  || 21;
-      const daysOff = parseInt(document.getElementById('daysOff').value, 10) || 21;
-      const startInput = document.getElementById('startDate').value || '2026-01-08';
-      const year = getSelectedYear();
-
-      const layoutClasses = document.getElementById('layoutStyle').value; // layout + theme classes
-      const startShift = new Date(startInput + 'T00:00:00');
-
-      const today = new Date(); today.setHours(0,0,0,0);
-      const container = document.getElementById('calendar');
-      container.className = 'calendar-grid ' + layoutClasses;
-      container.innerHTML = '';
-
-      const cycle = daysOn + daysOff;
-
-      for (let m = 0; m < 12; m++) {
-        const monthDiv = document.createElement('div');
-        monthDiv.className = 'month';
-
-        const first = new Date(year, m, 1);
-        let html = `<h3>${first.toLocaleString('default', { month: 'long' })}</h3>`;
-        html += `<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`;
-
-        for (let i = 0; i < first.getDay(); i++) html += `<div class=\"day empty\"></div>`;
-
-        const date = new Date(year, m, 1);
-        while (date.getMonth() === m) {
-          const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
-          let pos = diff % cycle; if (pos < 0) pos += cycle;
-          const type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
-          const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
-          html += `<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`;
-          date.setDate(date.getDate() + 1);
-        }
-
-        monthDiv.innerHTML = html + `</div>`;
-        container.appendChild(monthDiv);
+      /* IMPORTANT: Remove width caps and force the calendar to fill the image */
+      const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper');
+      const cloneCal=cloneRoot.querySelector('#calendar');
+      if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
+      if(cloneCal){
+        cloneCal.style.display='grid';
+        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)';
+        cloneCal.style.width=CAPTURE_WIDTH+'px';
+        cloneCal.style.maxWidth=CAPTURE_WIDTH+'px';
+        cloneCal.style.margin='0 auto';
       }
 
-      saveSettings();
-      requestAnimationFrame(applyAutoScale);
+      /* Set the outer clone to exactly the capture width */
+      cloneRoot.style.width=CAPTURE_WIDTH+'px';
+      cloneRoot.style.maxWidth=CAPTURE_WIDTH+'px';
+
+      /* Off-screen host */
+      const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot);
+      document.body.appendChild(host);
+
+      if(!window.html2canvas){ alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; }
+
+      /* Capture exactly the width we built, at hi-DPI */
+      window.html2canvas(cloneRoot, {
+        scale: 2.5,                 // higher DPI for extra crispness
+        useCORS: true,
+        backgroundColor: bg,
+        width: CAPTURE_WIDTH,
+        windowWidth: CAPTURE_WIDTH,
+        scrollX: 0, scrollY: 0
+      })
+      .then(canvas=>{ const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); link.click(); })
+      .catch(err=>{ console.error('html2canvas failed:',err); alert('Sorry, generating the image failed. See the console for details.'); })
+      .finally(()=>{ document.body.removeChild(host); });
     }
 
-    /* ========= Download (off-screen clone including banner) ========= */
-    function downloadCalendar() {
-      const year = getSelectedYear();
-      const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
-      const capInput = document.getElementById('captureWidth');
-      const CAPTURE_WIDTH = parseInt(capInput?.value || '1800', 10);
-
-      const liveRoot = document.getElementById('calendar-capture-root');
-      const cloneRoot = liveRoot.cloneNode(true);
-
-      // Ensure banner visibility state mirrors current value
-      // (it is cloned with inline style from updateNameBanner)
-
-      // Force tidy 3x4 grid for the calendar inside the clone
-      const cal = cloneRoot.querySelector('#calendar');
-      if (cal) {
-        cal.style.display = 'grid';
-        cal.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        cal.style.margin = '0 auto';
-      }
-
-      // Set a fixed capture width on the outer clone
-      cloneRoot.style.width = CAPTURE_WIDTH + 'px';
-      cloneRoot.style.maxWidth = CAPTURE_WIDTH + 'px';
-
-      const host = document.createElement('div');
-      host.style.position = 'fixed'; host.style.left = '-99999px'; host.style.top = '0';
-      host.style.zIndex = '-1'; host.style.background = bg;
-      host.appendChild(cloneRoot); document.body.appendChild(host);
-
-      if (!window.html2canvas) { alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; }
-
-      window.html2canvas(cloneRoot, { scale: 2, useCORS: true, backgroundColor: bg, windowWidth: CAPTURE_WIDTH + 100 })
-        .then(canvas => { const link = document.createElement('a'); link.download = `Shift-Calendar-${year}.png`; link.href = canvas.toDataURL('image/png'); link.click(); })
-        .catch(err => { console.error('html2canvas failed:', err); alert('Sorry, generating the image failed. See the console for details.'); })
-        .finally(() => { document.body.removeChild(host); });
-    }
-
-    // Minimal Option B: static titles once (no dynamic year)
-    document.title = 'North Slope Shift Calendar';
-    (function(){ const h = document.getElementById('pageTitle'); if (h) h.textContent = 'North Slope Shift Calendar'; })();
-
-    // Load any saved settings, apply colors/name, then render & init
-    loadSettings();
-    updateColors();
-    updateNameBanner();
-    generateCalendar();
-    initAutoScale();
-
-    // Persist on changes
+    /* Init */
+    document.title='North Slope Shift Calendar'; (function(){ const h=document.getElementById('pageTitle'); if(h) h.textContent='North Slope Shift Calendar'; })();
+    loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
     document.getElementById('layoutStyle').addEventListener('change', saveSettings);
     document.getElementById('daysOn').addEventListener('input', saveSettings);
     document.getElementById('daysOff').addEventListener('input', saveSettings);
