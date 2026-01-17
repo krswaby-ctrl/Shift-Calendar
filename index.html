@@ -14,6 +14,11 @@
       --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
       --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee;
       --border-strong:#000;
+      /* Dynamic tints (set by JS) */
+      --on-tint-soft: rgba(52,152,219,0.12);
+      --travel-tint-soft: rgba(230,126,34,0.14);
+      --on-tint-strong: rgba(52,152,219,0.16);
+      --travel-tint-strong: rgba(230,126,34,0.18);
     }
     body.dark-mode {
       --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d; --border-color:#444;
@@ -39,15 +44,18 @@
     .controls{ background:var(--bg-card); padding:20px; border-radius:12px; display:flex; gap:15px; flex-wrap:wrap; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,.1); align-items:flex-end; }
     .control-group{ display:flex; flex-direction:column; gap:4px; }
     label{ font-weight:700; font-size:.95em; color:var(--text-main); opacity:.9; }
-    input,select{ padding:10px; border:1px solid var(--border-color); border-radius:6px; width:200px; max-width:48vw; background:var(--bg-card); color:var(--text-main); }
+    input,select{ padding:10px; border:1px solid var(--border-color); border-radius:6px; width:220px; max-width:60vw; background:var(--bg-card); color:var(--text-main); }
+    input[type=range]{ width:240px; }
     .btn{ padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; }
     .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; }
 
-    /* Grid container (Option A responsive) */
+    /* Grid container */
     .calendar-grid{ display:grid; gap:22px; --month-min:340px; }
     .layout-standard{ --month-min:360px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:22px; }
     .layout-compact{  --month-min:340px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:16px; }
     .layout-poster{   --month-min:380px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:26px; }
+    .layout-grid{     --month-min:360px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:20px; }
+    .layout-wall{     --month-min:360px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:20px; }
 
     /* Auto-scale wrapper */
     #calendar-scale-wrapper{ --calendar-design-width:1600px; width:100%; display:flex; justify-content:center; overflow:visible; }
@@ -69,13 +77,10 @@
     .empty{ visibility:hidden; }
     input[type=color]{ padding:0; height:40px; cursor:pointer; }
 
-    /* === DISTINCT STYLE SIGNATURES (keep bold borders + larger type) === */
+    /* === DISTINCT STYLE SIGNATURES === */
 
-    /* ---------- CLASSIC CARDS: soft cards, pill days, gentle fills ---------- */
-    .theme-standard .month {
-      border: 2px solid var(--border-strong);
-      box-shadow: 0 3px 10px rgba(0,0,0,.08);
-    }
+    /* ---------- CLASSIC CARDS ---------- */
+    .theme-standard .month { border: 2px solid var(--border-strong); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
     .theme-standard h3 { color: var(--on-color); text-transform:none; letter-spacing:0; }
     .theme-standard .weekday-header { color:#5b6b7c; }
     .theme-standard .day { border-radius:999px; background:#f6f9ff; }
@@ -83,31 +88,73 @@
     .theme-standard .on-shift { background:var(--on-color)!important; color:#fff; border-color:var(--on-color); }
     .theme-standard .travel-day { background:var(--travel-color)!important; color:#fff; border-color:var(--travel-color); }
 
-    /* ---------- DENSE OUTLINE: transparent tiles, colored borders ---------- */
-    .theme-outline .month { background:#fff; border:2px solid var(--border-strong); box-shadow:none; }
-    .theme-outline h3 { color:#222; background:#f7f7f7; text-transform:uppercase; letter-spacing:.04em; border:none; }
-    .theme-outline .weekday-header { color:#555; letter-spacing:.02em; }
-    .theme-outline .day { border-radius:6px; background:transparent; }
-    .theme-outline .off-day { background:transparent; color:#222; border-color:var(--border-strong); }
-    .theme-outline .on-shift { background:transparent!important; color:var(--on-color); border-color:var(--on-color); }
-    .theme-outline .travel-day { background:transparent!important; color:var(--travel-color); border-color:var(--travel-color); }
+    /* ---------- AURORA MOSAIC (NEW) ---------- */
+    .theme-aurora .month {
+      border: 2px solid var(--border-strong);
+      border-radius: 16px;
+      background:
+        radial-gradient(1200px 600px at -10% -20%, rgba(52,152,219,.12), transparent 60%),
+        radial-gradient(1000px 500px at 120% 10%, rgba(230,126,34,.12), transparent 55%),
+        #ffffff;
+      box-shadow: 0 14px 32px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .theme-aurora h3 {
+      color: #fff;
+      text-transform: uppercase; letter-spacing:.12em; font-weight:900;
+      margin:-18px -18px 14px -18px; padding:16px 14px;
+      background: linear-gradient(135deg, var(--on-color), var(--travel-color));
+      border:none; font-size:1.25rem;
+      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
+    .theme-aurora .weekday-header {
+      background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,0));
+      color:#2c3e50; font-weight:900; letter-spacing:.04em;
+      border: 1px solid rgba(0,0,0,.12); border-left:none; border-right:none;
+    }
+    .theme-aurora .day {
+      border-radius: 10px;
+      background: #f9fbff;
+      position: relative; overflow: hidden;
+    }
+    .theme-aurora .day::after {
+      content: ""; position:absolute; inset:0; pointer-events:none;
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 6px, rgba(255,255,255,0) 6px 12px);
+      mix-blend-mode: overlay;
+    }
+    .theme-aurora .off-day { background:#f3f6fb; color:#213042; }
+    .theme-aurora .on-shift {
+      background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color));
+      color:#fff; border-color: var(--on-color); text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
+    .theme-aurora .travel-day {
+      background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color));
+      color:#fff; border-color: var(--travel-color); text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
 
-    /* ---------- POSTER BOARD: poster band, uppercase, square tiles ---------- */
-    .theme-poster .month {
-      border:2px solid var(--border-strong); border-radius:14px;
-      background:linear-gradient(145deg, rgba(52,152,219,.06), rgba(230,126,34,.06));
-      box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden;
-    }
-    .theme-poster h3 {
-      text-transform:uppercase; letter-spacing:.08em; font-weight:900; color:#fff;
-      margin:-18px -18px 14px -18px; padding:16px 12px;
-      background:linear-gradient(135deg, var(--on-color), var(--travel-color)); border:none; font-size:1.3rem;
-    }
+    /* ---------- POSTER BOARD ---------- */
+    .theme-poster .month { border:2px solid var(--border-strong); border-radius:14px; background:linear-gradient(145deg, rgba(52,152,219,.06), rgba(230,126,34,.06)); box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
+    .theme-poster h3 { text-transform:uppercase; letter-spacing:.08em; font-weight:900; color:#fff; margin:-18px -18px 14px -18px; padding:16px 12px; background:linear-gradient(135deg, var(--on-color), var(--travel-color)); border:none; font-size:1.3rem; }
     .theme-poster .weekday-header { color:#444; font-weight:900; }
     .theme-poster .day { border-radius:2px; background:rgba(255,255,255,0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 1px .5px rgba(0,0,0,.05); }
     .theme-poster .off-day { background:rgba(255,255,255,0.65); }
-    .theme-poster .on-shift { background:var(--on-color)!important; color:#fff; }
-    .theme-poster .travel-day { background:var(--travel-color)!important; color:#fff; }
+
+    /* ---------- CLEAN GRID (Black borders; tints via variables) ---------- */
+    .theme-clean-grid .month { border:2px solid #000; box-shadow:none; background:#fff; }
+    .theme-clean-grid h3 { color:#111; background:#f1f3f5; border:none; padding:12px; border-radius:6px; }
+    .theme-clean-grid .weekday-header { background:#f6f7f8; color:#333; border:1px solid #000; border-left:none; border-right:none; }
+    .theme-clean-grid .day { border-radius:0; background:#fff; border-color:#000; }
+    .theme-clean-grid .on-shift { background: var(--on-tint-soft) !important; color:#0b3e69; border-color:#000 !important; }
+    .theme-clean-grid .travel-day { background: var(--travel-tint-soft) !important; color:#6a350a; border-color:#000 !important; }
+
+    /* ---------- WALL CALENDAR (Black borders; tints via variables) ---------- */
+    .theme-wall .month { border:2px solid #000; border-radius:10px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+    .theme-wall h3 { text-transform:uppercase; letter-spacing:.05em; color:#fff; margin:-18px -18px 12px -18px; padding:14px 12px; background:var(--on-color); border:none; }
+    .theme-wall .weekday-header { color:#222; font-weight:900; letter-spacing:.02em; }
+    .theme-wall .day { border-radius:0; justify-content:flex-end; align-items:flex-start; padding:6px 8px; background:#fff; border-color:#000; }
+    .theme-wall .off-day { background:#fff; color:#222; }
+    .theme-wall .on-shift { background: var(--on-tint-strong) !important; color:#0b3e69; border-color:#000 !important; }
+    .theme-wall .travel-day { background: var(--travel-tint-strong) !important; color:#6a350a; border-color:#000 !important; }
 
     /* Print */
     @media print{
@@ -148,15 +195,22 @@
       <div class="control-group"><label for="daysOff">Days OFF</label><input type="number" id="daysOff" min="1" step="1" value="21"></div>
       <div class="control-group"><label for="startDate">1st Day ON</label><input type="date" id="startDate" value="2026-01-08"></div>
       <div class="control-group"><label for="layoutStyle">Style</label>
+        <!-- Reversed order (exact opposite) -->
         <select id="layoutStyle" onchange="generateCalendar()">
-          <option value="layout-standard theme-standard">Classic Cards</option>
-          <option value="layout-compact theme-outline">Dense Outline</option>
+          <option value="layout-wall theme-wall">Wall Calendar</option>
+          <option value="layout-grid theme-clean-grid">Clean Grid</option>
           <option value="layout-poster theme-poster">Poster Board</option>
+          <option value="layout-compact theme-aurora">Aurora Mosaic (NEW)</option>
+          <option value="layout-standard theme-standard">Classic Cards</option>
         </select>
       </div>
-      <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()" aria-label="Work color"></div>
-      <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()" aria-label="Travel color"></div>
-      <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Turd Ferguson" oninput="handleNameInput()" maxlength="80"></div>
+      <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors(); saveSettings()" aria-label="Work color"></div>
+      <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors(); saveSettings()" aria-label="Travel color"></div>
+      <div class="control-group"><label for="tintStrength">Tint strength</label>
+        <input type="range" id="tintStrength" min="8" max="30" step="1" value="16" oninput="updateColors(); saveSettings();">
+        <small style="opacity:.7">Adjusts fill intensity for Clean Grid & Wall Calendar</small>
+      </div>
+      <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Turd Ferguson" oninput="handleNameInput(); saveSettings()" maxlength="80"></div>
       <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
       <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
       <button type="button" class="btn" style="background:#2d6cdf;color:#fff;" onclick="downloadCalendarPDF()">Download PDF</button>
@@ -173,22 +227,64 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name' };
+    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name', tint:'sc_tint' };
 
-    function saveSettings(){ try{ localStorage.setItem(LS_KEYS.year, yearSelect.value); localStorage.setItem(LS_KEYS.on, daysOn.value); localStorage.setItem(LS_KEYS.off, daysOff.value); localStorage.setItem(LS_KEYS.start, startDate.value); localStorage.setItem(LS_KEYS.style, layoutStyle.value); localStorage.setItem(LS_KEYS.work, workColor.value); localStorage.setItem(LS_KEYS.travel, travelColor.value); localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0'); const cap=captureWidth; if(cap) localStorage.setItem(LS_KEYS.capture, cap.value); const nm=nameField; if(nm) localStorage.setItem(LS_KEYS.name, nm.value.trim()); }catch(e){} }
-    function loadSettings(){ try{ const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v) el.value=v; }; setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off); setIf(startDate,LS_KEYS.start); setIf(layoutStyle,LS_KEYS.style); setIf(workColor,LS_KEYS.work); setIf(travelColor,LS_KEYS.travel); setIf(nameField,LS_KEYS.name); const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap; if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode'); }catch(e){} }
+    function saveSettings(){ try{
+      localStorage.setItem(LS_KEYS.year, yearSelect.value);
+      localStorage.setItem(LS_KEYS.on, daysOn.value);
+      localStorage.setItem(LS_KEYS.off, daysOff.value);
+      localStorage.setItem(LS_KEYS.start, startDate.value);
+      localStorage.setItem(LS_KEYS.style, layoutStyle.value);
+      localStorage.setItem(LS_KEYS.work, workColor.value);
+      localStorage.setItem(LS_KEYS.travel, travelColor.value);
+      localStorage.setItem(LS_KEYS.tint, tintStrength.value);
+      localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0');
+      if(captureWidth) localStorage.setItem(LS_KEYS.capture, captureWidth.value);
+      if(nameField) localStorage.setItem(LS_KEYS.name, nameField.value.trim());
+    }catch(e){} }
+
+    function loadSettings(){ try{
+      const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; };
+      setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off); setIf(startDate,LS_KEYS.start);
+      setIf(layoutStyle,LS_KEYS.style); setIf(workColor,LS_KEYS.work); setIf(travelColor,LS_KEYS.travel); setIf(nameField,LS_KEYS.name); setIf(tintStrength,LS_KEYS.tint);
+      const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap;
+      if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
+    }catch(e){} }
+
+    function __hexToRGBA(hex, alpha) {
+      try { const h=(hex||'#000').replace('#',''); const n=parseInt(h,16); const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`; } catch(e){ return `rgba(0,0,0,${alpha||1})`; }
+    }
+
+    function updateColors(){
+      const onHex = workColor?.value || '#3498db';
+      const trHex = travelColor?.value || '#e67e22';
+      const basePct = parseInt(tintStrength?.value || '16', 10);
+      const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+      const softOnPct = clamp(basePct - 4, 5, 40);
+      const softTrPct = clamp(basePct - 2, 5, 40);
+      const strongOnPct = clamp(basePct,     5, 40);
+      const strongTrPct = clamp(basePct + 2, 5, 40);
+
+      document.documentElement.style.setProperty('--on-color', onHex);
+      document.documentElement.style.setProperty('--travel-color', trHex);
+      document.documentElement.style.setProperty('--on-tint-soft', __hexToRGBA(onHex, softOnPct/100));
+      document.documentElement.style.setProperty('--travel-tint-soft', __hexToRGBA(trHex, softTrPct/100));
+      document.documentElement.style.setProperty('--on-tint-strong', __hexToRGBA(onHex, strongOnPct/100));
+      document.documentElement.style.setProperty('--travel-tint-strong', __hexToRGBA(trHex, strongTrPct/100));
+    }
 
     function handleNameInput(){ updateNameInline(); saveSettings(); }
     function updateNameInline(){ const val=(nameField.value||'').trim(); const wrap=nameInline; const text=nameInlineText; if(val){ text.textContent=val; wrap.style.display='inline-flex'; wrap.setAttribute('aria-hidden','false'); } else { text.textContent=''; wrap.style.display='none'; wrap.setAttribute('aria-hidden','true'); } }
 
-    function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){} yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08'; layoutStyle.value='layout-standard theme-standard'; workColor.value='#3498db'; travelColor.value='#e67e22'; captureWidth.value='2000'; nameField.value=''; document.body.classList.remove('dark-mode'); updateColors(); updateNameInline(); generateCalendar(); applyAutoScale(); saveSettings(); }
+    function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+      yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08';
+      layoutStyle.value='layout-wall theme-wall'; // default to first in reversed list
+      workColor.value='#3498db'; travelColor.value='#e67e22'; tintStrength.value='16'; captureWidth.value='2000'; nameField.value=''; document.body.classList.remove('dark-mode');
+      updateColors(); updateNameInline(); generateCalendar(); applyAutoScale(); saveSettings(); }
 
     let currentScale=1;
-    function updateColors(){ document.documentElement.style.setProperty('--on-color',workColor.value); document.documentElement.style.setProperty('--travel-color',travelColor.value); }
-
     function applyAutoScale(){ const w=calendarScaleWrapper, c=calendar; if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
     function initAutoScale(){ applyAutoScale(); if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper); } else { window.addEventListener('resize',applyAutoScale); } }
-
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
 
     function getSelectedYear(){ const y=parseInt(yearSelect.value,10); return Number.isFinite(y)?y:(new Date()).getFullYear(); }
@@ -196,85 +292,21 @@
 
     function generateCalendar(){ const dOn=parseInt(daysOn.value,10)||21; const dOff=parseInt(daysOff.value,10)||21; const startInput=startDate.value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=layoutStyle.value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=dOn+dOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-    /* Build clone for exports */
-    function buildCloneForCapture(){
-      const CAPTURE_WIDTH=parseInt(captureWidth.value||'2000',10);
-      const liveRoot=document.getElementById('calendar-capture-root');
-      const cloneRoot=liveRoot.cloneNode(true);
-      cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove());
-      cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
-      const chip=cloneRoot.querySelector('.name-chip');
-      if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
-      cloneRoot.style.setProperty('--border-strong','#000');
-      const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper');
-      const cloneCal=cloneRoot.querySelector('#calendar');
-      if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
-      if(cloneCal){
-        cloneCal.style.display='grid';
-        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)';
-        cloneCal.style.width=CAPTURE_WIDTH+'px';
-        cloneCal.style.maxWidth=CAPTURE_WIDTH+'px';
-        cloneCal.style.margin='0 auto';
-      }
-      cloneRoot.style.width=CAPTURE_WIDTH+'px';
-      cloneRoot.style.maxWidth=CAPTURE_WIDTH+'px';
-      return { cloneRoot, CAPTURE_WIDTH };
-    }
+    function buildCloneForCapture(){ const CAPTURE_WIDTH=parseInt(captureWidth.value||'2000',10); const liveRoot=document.getElementById('calendar-capture-root'); const cloneRoot=liveRoot.cloneNode(true); cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove()); cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove()); const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
+      cloneRoot.style.setProperty('--border-strong','#000'); const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper'); const cloneCal=cloneRoot.querySelector('#calendar'); if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; } if(cloneCal){ cloneCal.style.display='grid'; cloneCal.style.gridTemplateColumns='repeat(3, 1fr)'; cloneCal.style.width=CAPTURE_WIDTH+'px'; cloneCal.style.maxWidth=CAPTURE_WIDTH+'px'; cloneCal.style.margin='0 auto'; }
+      cloneRoot.style.width=CAPTURE_WIDTH+'px'; cloneRoot.style.maxWidth=CAPTURE_WIDTH+'px'; return { cloneRoot, CAPTURE_WIDTH }; }
 
-    function downloadCalendar(){
-      const year=getSelectedYear();
-      const bg=document.body.classList.contains('dark-mode')?'#1a1a1a':'#ffffff';
-      const { cloneRoot, CAPTURE_WIDTH }=buildCloneForCapture();
-      const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host);
-      if(!window.html2canvas){ alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; }
-      window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 })
-        .then(canvas=>{ const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); link.click(); })
-        .catch(err=>{ console.error('html2canvas failed:',err); alert('Sorry, generating the image failed. See the console for details.'); })
-        .finally(()=>{ document.body.removeChild(host); });
-    }
+    function downloadCalendar(){ const year=getSelectedYear(); const bg=document.body.classList.contains('dark-mode')?'#1a1a1a':'#ffffff'; const { cloneRoot, CAPTURE_WIDTH }=buildCloneForCapture(); const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host); if(!window.html2canvas){ alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; } window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 }).then(canvas=>{ const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); link.click(); }).catch(err=>{ console.error('html2canvas failed:',err); alert('Sorry, generating the image failed. See the console for details.'); }).finally(()=>{ document.body.removeChild(host); }); }
 
-    async function downloadCalendarPDF(){
-      const { jsPDF } = window.jspdf || {};
-      if(!jsPDF){ alert('PDF library is still loading. Please try again in a moment.'); return; }
-      const year=getSelectedYear();
-      const bg='#ffffff';
-      const { cloneRoot, CAPTURE_WIDTH }=buildCloneForCapture();
-      const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host);
-      try{
-        const canvas=await window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 });
-        const imgData=canvas.toDataURL('image/jpeg',0.95);
-
-        // Fit to US Letter (8.5" x 11") single page with margins
-        const pxToPt = px => (px/96)*72; // 96dpi -> pt
-        const pageW = 612;  // 8.5in * 72pt
-        const pageH = 792;  // 11in  * 72pt
-        const MARGIN = 24;  // ~0.33in margins
-        const maxW = pageW - 2*MARGIN;
-        const maxH = pageH - 2*MARGIN;
-        const imgWpt = pxToPt(canvas.width);
-        const imgHpt = pxToPt(canvas.height);
-        const scale = Math.min(maxW/imgWpt, maxH/imgHpt);
-        const drawW = imgWpt * scale;
-        const drawH = imgHpt * scale;
-        const offX = (pageW - drawW)/2;
-        const offY = (pageH - drawH)/2;
-
-        const pdf = new jsPDF({ orientation:'p', unit:'pt', format:'letter' });
-        pdf.addImage(imgData,'JPEG', offX, offY, drawW, drawH);
-        pdf.save(`Shift-Calendar-${year}.pdf`);
-      }catch(err){
-        console.error('PDF generation failed:',err);
-        alert('Sorry, generating the PDF failed. See the console for details.');
-      } finally { document.body.removeChild(host); }
-    }
+    async function downloadCalendarPDF(){ const { jsPDF } = window.jspdf || {}; if(!jsPDF){ alert('PDF library is still loading. Please try again in a moment.'); return; } const year=getSelectedYear(); const bg='#ffffff'; const { cloneRoot, CAPTURE_WIDTH }=buildCloneForCapture(); const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host); try{ const canvas=await window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 }); const imgData=canvas.toDataURL('image/jpeg',0.95); const pxToPt=px=>(px/96)*72; const pageW=612, pageH=792, MARGIN=24; const maxW=pageW-2*MARGIN, maxH=pageH-2*MARGIN; const imgWpt=pxToPt(canvas.width), imgHpt=pxToPt(canvas.height); const scale=Math.min(maxW/imgWpt, maxH/imgHpt); const drawW=imgWpt*scale, drawH=imgHpt*scale; const offX=(pageW-drawW)/2, offY=(pageH-drawH)/2; const pdf=new jsPDF({ orientation:'p', unit:'pt', format:'letter' }); pdf.addImage(imgData,'JPEG',offX,offY,drawW,drawH); pdf.save(`Shift-Calendar-${year}.pdf`);}catch(err){ console.error('PDF generation failed:',err); alert('Sorry, generating the PDF failed. See the console for details.'); } finally { document.body.removeChild(host); } }
 
     // Init references
-    document.title='North Slope Shift Calendar'; (function(){ const h=document.getElementById('pageTitle'); if(h) h.textContent='North Slope Shift Calendar'; })();
-    const yearSelect=document.getElementById('yearSelect'); const daysOn=document.getElementById('daysOn'); const daysOff=document.getElementById('daysOff'); const startDate=document.getElementById('startDate'); const layoutStyle=document.getElementById('layoutStyle'); const workColor=document.getElementById('workColor'); const travelColor=document.getElementById('travelColor'); const nameField=document.getElementById('nameField'); const captureWidth=document.getElementById('captureWidth'); const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper'); const calendar=document.getElementById('calendar'); const nameInline=document.getElementById('nameInline'); const nameInlineText=document.getElementById('nameInlineText');
+    document.title='North Slope Shift Calendar';
+    const yearSelect=document.getElementById('yearSelect'); const daysOn=document.getElementById('daysOn'); const daysOff=document.getElementById('daysOff'); const startDate=document.getElementById('startDate'); const layoutStyle=document.getElementById('layoutStyle'); const workColor=document.getElementById('workColor'); const travelColor=document.getElementById('travelColor'); const tintStrength=document.getElementById('tintStrength'); const nameField=document.getElementById('nameField'); const captureWidth=document.getElementById('captureWidth'); const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper'); const calendar=document.getElementById('calendar'); const nameInline=document.getElementById('nameInline'); const nameInlineText=document.getElementById('nameInlineText');
 
-    // Load + render
     loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
-    layoutStyle.addEventListener('change', saveSettings); daysOn.addEventListener('input', saveSettings); daysOff.addEventListener('input', saveSettings); startDate.addEventListener('input', saveSettings); workColor.addEventListener('input', saveSettings); travelColor.addEventListener('input', saveSettings); nameField.addEventListener('input', saveSettings);
+
+    layoutStyle.addEventListener('change', saveSettings); daysOn.addEventListener('input', saveSettings); daysOff.addEventListener('input', saveSettings); startDate.addEventListener('input', saveSettings); workColor.addEventListener('input', saveSettings); travelColor.addEventListener('input', saveSettings); tintStrength.addEventListener('input', saveSettings); nameField.addEventListener('input', saveSettings);
   </script>
 </body>
 </html>

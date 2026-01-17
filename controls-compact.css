@@ -1,0 +1,9 @@
+/* === Compact Controls: smaller inputs/buttons, tighter layout === */
+.controls{ padding:14px; gap:10px; row-gap:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); align-items:end; }
+.control-group{ gap:2px; }
+.controls label{ font-size:.82em; opacity:.85; }
+.controls input, .controls select{ padding:6px 8px; font-size:.9rem; border-radius:5px; width:170px; max-width:42vw; }
+.controls input[type=range]{ width:180px; }
+.controls .btn{ padding:8px 12px; font-size:.9rem; border-radius:6px; width:100%; }
+@media (min-width:780px){ .controls{ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } .controls .btn{ width:auto; } }
+@media (max-width:450px){ .controls input, .controls select{ width:150px; } .controls input[type=range]{ width:160px; } .controls .btn{ padding:9px 12px; } }
