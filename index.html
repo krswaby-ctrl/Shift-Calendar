@@ -13,11 +13,11 @@
     :root {
       --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
       --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee;
-      --border-strong:#000;                 /* new: strong border color for images/print */
+      --border-strong:#000;
     }
     body.dark-mode {
       --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d; --border-color:#444;
-      --border-strong:#e6e6e6;             /* readable borders on dark screen */
+      --border-strong:#e6e6e6;
     }
     body { font-family:'Segoe UI',system-ui,sans-serif; padding:20px; background:var(--bg-body); color:var(--text-main); margin:0; transition:background .3s,color .3s; }
 
@@ -69,21 +69,47 @@
     .empty{ visibility:hidden; }
     input[type=color]{ padding:0; height:40px; cursor:pointer; }
 
-    /* Themes (keep shape tweaks, but keep our bold borders) */
-    .theme-standard .day{ border-radius:10px; }
-    .theme-outline .month{ box-shadow:none; border:2px solid var(--border-strong); border-radius:8px; }
-    .theme-outline h3{ color:var(--text-main); background:rgba(0,0,0,0.03); border:none; padding:10px; border-radius:6px; font-weight:800; }
-    .theme-outline .day{ border-radius:6px; background:transparent; font-size:1.0em; }
-    .theme-outline .weekday-header{ color:#555; }
+    /* === DISTINCT STYLE SIGNATURES (keep bold borders + larger type) === */
 
-    .theme-poster .month{ border-radius:14px; background:linear-gradient(145deg, rgba(52,152,219,.06), rgba(230,126,34,.06)); box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; border:2px solid var(--border-strong); }
-    .theme-poster h3{ color:#fff; margin:-18px -18px 14px -18px; padding:16px 12px; background:linear-gradient(135deg,var(--on-color),var(--travel-color)); border:none; font-size:1.3rem; }
-    .theme-poster .weekday-header{ color:#555; font-weight:900; }
-    .theme-poster .day{ border-radius:6px; background:rgba(255,255,255,0.7); }
-    .theme-poster .off-day{ background:rgba(255,255,255,0.5); }
-    .theme-poster .today{ outline-color:#e74c3c; }
+    /* ---------- CLASSIC CARDS: soft cards, pill days, gentle fills ---------- */
+    .theme-standard .month {
+      border: 2px solid var(--border-strong);
+      box-shadow: 0 3px 10px rgba(0,0,0,.08);
+    }
+    .theme-standard h3 { color: var(--on-color); text-transform:none; letter-spacing:0; }
+    .theme-standard .weekday-header { color:#5b6b7c; }
+    .theme-standard .day { border-radius:999px; background:#f6f9ff; }
+    .theme-standard .off-day { background:#f2f6fb; color:#222; }
+    .theme-standard .on-shift { background:var(--on-color)!important; color:#fff; border-color:var(--on-color); }
+    .theme-standard .travel-day { background:var(--travel-color)!important; color:#fff; border-color:var(--travel-color); }
 
-    /* Print (ensure strong borders + larger text) */
+    /* ---------- DENSE OUTLINE: transparent tiles, colored borders ---------- */
+    .theme-outline .month { background:#fff; border:2px solid var(--border-strong); box-shadow:none; }
+    .theme-outline h3 { color:#222; background:#f7f7f7; text-transform:uppercase; letter-spacing:.04em; border:none; }
+    .theme-outline .weekday-header { color:#555; letter-spacing:.02em; }
+    .theme-outline .day { border-radius:6px; background:transparent; }
+    .theme-outline .off-day { background:transparent; color:#222; border-color:var(--border-strong); }
+    .theme-outline .on-shift { background:transparent!important; color:var(--on-color); border-color:var(--on-color); }
+    .theme-outline .travel-day { background:transparent!important; color:var(--travel-color); border-color:var(--travel-color); }
+
+    /* ---------- POSTER BOARD: poster band, uppercase, square tiles ---------- */
+    .theme-poster .month {
+      border:2px solid var(--border-strong); border-radius:14px;
+      background:linear-gradient(145deg, rgba(52,152,219,.06), rgba(230,126,34,.06));
+      box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden;
+    }
+    .theme-poster h3 {
+      text-transform:uppercase; letter-spacing:.08em; font-weight:900; color:#fff;
+      margin:-18px -18px 14px -18px; padding:16px 12px;
+      background:linear-gradient(135deg, var(--on-color), var(--travel-color)); border:none; font-size:1.3rem;
+    }
+    .theme-poster .weekday-header { color:#444; font-weight:900; }
+    .theme-poster .day { border-radius:2px; background:rgba(255,255,255,0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 1px .5px rgba(0,0,0,.05); }
+    .theme-poster .off-day { background:rgba(255,255,255,0.65); }
+    .theme-poster .on-shift { background:var(--on-color)!important; color:#fff; }
+    .theme-poster .travel-day { background:var(--travel-color)!important; color:#fff; }
+
+    /* Print */
     @media print{
       @page{ size:auto; margin:0.25in; }
       .controls,.btn-print,.btn-dark{ display:none!important; }
@@ -99,7 +125,6 @@
       .name-chip .value{ font-weight:800!important; font-size:1.1rem!important; }
     }
 
-    /* Small screens: stack header */
     @media (max-width:700px){ .header-container{ grid-template-columns:1fr; justify-items:center; text-align:center; gap:10px; } #pageTitle{ justify-self:center; } .legend{ justify-self:center; } }
   </style>
 </head>
@@ -171,30 +196,22 @@
 
     function generateCalendar(){ const dOn=parseInt(daysOn.value,10)||21; const dOff=parseInt(daysOff.value,10)||21; const startInput=startDate.value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=layoutStyle.value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=dOn+dOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-    /* --- Shared clone builder for PNG + PDF (sets full width, removes controls, normalizes borders) --- */
+    /* Build clone for exports */
     function buildCloneForCapture(){
       const CAPTURE_WIDTH=parseInt(captureWidth.value||'2000',10);
       const liveRoot=document.getElementById('calendar-capture-root');
       const cloneRoot=liveRoot.cloneNode(true);
-
-      // Remove the controls from the exported artifact
       cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove());
-
-      // Name: plain text only
       cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
       const chip=cloneRoot.querySelector('.name-chip');
       if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
-
-      // Force strong borders (black) regardless of dark-mode
       cloneRoot.style.setProperty('--border-strong','#000');
-
-      // Remove width caps and set exact width so the calendar fills the image/PDF
       const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper');
       const cloneCal=cloneRoot.querySelector('#calendar');
       if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
       if(cloneCal){
         cloneCal.style.display='grid';
-        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)'; // 3×4
+        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)';
         cloneCal.style.width=CAPTURE_WIDTH+'px';
         cloneCal.style.maxWidth=CAPTURE_WIDTH+'px';
         cloneCal.style.margin='0 auto';
@@ -226,9 +243,24 @@
       try{
         const canvas=await window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 });
         const imgData=canvas.toDataURL('image/jpeg',0.95);
-        const pxToPt=px=>(px/96)*72; const pdfW=pxToPt(canvas.width); const pdfH=pxToPt(canvas.height);
-        const pdf=new jsPDF({ orientation: pdfW>pdfH?'l':'p', unit:'pt', format:[pdfW,pdfH] });
-        pdf.addImage(imgData,'JPEG',0,0,pdfW,pdfH);
+
+        // Fit to US Letter (8.5" x 11") single page with margins
+        const pxToPt = px => (px/96)*72; // 96dpi -> pt
+        const pageW = 612;  // 8.5in * 72pt
+        const pageH = 792;  // 11in  * 72pt
+        const MARGIN = 24;  // ~0.33in margins
+        const maxW = pageW - 2*MARGIN;
+        const maxH = pageH - 2*MARGIN;
+        const imgWpt = pxToPt(canvas.width);
+        const imgHpt = pxToPt(canvas.height);
+        const scale = Math.min(maxW/imgWpt, maxH/imgHpt);
+        const drawW = imgWpt * scale;
+        const drawH = imgHpt * scale;
+        const offX = (pageW - drawW)/2;
+        const offY = (pageH - drawH)/2;
+
+        const pdf = new jsPDF({ orientation:'p', unit:'pt', format:'letter' });
+        pdf.addImage(imgData,'JPEG', offX, offY, drawW, drawH);
         pdf.save(`Shift-Calendar-${year}.pdf`);
       }catch(err){
         console.error('PDF generation failed:',err);
