@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
 
-  <!-- Keep your existing icon + manifest links (working on GitHub Pages) -->
+  <!-- Keep your existing icon + manifest links (as requested) -->
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -117,7 +117,11 @@
       border: none;
     }
     .theme-poster .weekday-header { color: #666; font-weight: 700; }
-    .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
+    .theme-poster .day {
+      border-radius: 0;
+      border: 1px dashed transparent;
+      background: rgba(255,255,255,0.6);
+    }
     .theme-poster .off-day { background: rgba(255,255,255,0.3); }
     .theme-poster .today { border-color: #e74c3c !important; }
 
@@ -125,8 +129,17 @@
     @media print {
       .controls, .btn-print, .btn-dark { display: none !important; }
       body { background: white !important; color: black !important; padding: 0 !important; }
-      .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
-      .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; font-size: 0.8rem !important; }
+      .calendar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
+      }
+      .month {
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        font-size: 0.8rem !important; /* fits on one page */
+      }
     }
   </style>
 </head>
@@ -153,6 +166,7 @@
 
     <div class="control-group">
       <label for="layoutStyle">Style</label>
+      <!-- Applies both layout and theme classes -->
       <select id="layoutStyle" onchange="generateCalendar()">
         <option value="layout-standard theme-standard">Classic Cards</option>
         <option value="layout-compact theme-outline">Dense Outline</option>
@@ -161,7 +175,7 @@
     </div>
 
     <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()" aria-label="Work color"></div>
-    <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors" aria-label="Travel color"></div>
+    <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()" aria-label="Travel color"></div>
 
     <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
     <button type="button" class="btn btn-dark" onclick="document.body.classList.toggle('dark-mode')">Dark Mode</button>
@@ -176,7 +190,7 @@
 
   <div id="calendar" class="calendar-grid"></div>
 
-  <!-- Load html2canvas BEFORE our inline script to ensure it's ready -->
+  <!-- Load html2canvas BEFORE our inline script (no SRI/crossorigin to avoid blocks) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
@@ -216,9 +230,9 @@
 
         const first = new Date(year, m, 1);
         let html = `<h3>${first.toLocaleString('default', { month: 'long' })}</h3>`;
-        html += `<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`;
+        html += `<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
 
-        for (let i = 0; i < first.getDay(); i++) html += `<div class=\"day empty\"></div>`;
+        for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
 
         const date = new Date(year, m, 1);
         while (date.getMonth() === m) {
@@ -229,7 +243,7 @@
           const type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
           const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
 
-          html += `<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`;
+          html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
           date.setDate(date.getDate() + 1);
         }
 
@@ -243,13 +257,14 @@
       const calendar = document.getElementById('calendar');
       const year = getSelectedYear();
 
+      // Save original inline styles to restore after capture
       const original = {
         display: calendar.style.display,
         gridTemplateColumns: calendar.style.gridTemplateColumns,
         maxWidth: calendar.style.maxWidth
       };
 
-      // Force 3x4 layout for the screenshot
+      // Force 3x4 grid for a reasonable canvas size
       calendar.style.display = 'grid';
       calendar.style.gridTemplateColumns = 'repeat(3, 1fr)';
       calendar.style.maxWidth = '1200px';
