@@ -38,15 +38,8 @@
       transition: background 0.3s;
     }
 
-    .header-container {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 15px;
-    }
-    .legend {
-      display: flex; gap: 15px; background: var(--bg-card);
-      padding: 10px 15px; border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .legend { display: flex; gap: 15px; background: var(--bg-card); padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; }
     .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ddd; }
 
@@ -64,8 +57,8 @@
 
     /* Auto-scale wrapper: scales the whole calendar down on small screens */
     #calendar-scale-wrapper {
-      /* “Design width” the layout targets on desktop; matches download width */
-      --calendar-design-width: 1200px;
+      /* “Design width” the layout targets on desktop; matches main screen width */
+      --calendar-design-width: 1400px; /* was 1200px */
       width: 100%;
       display: flex;
       justify-content: center;    /* keep it centered when scaled */
@@ -81,6 +74,13 @@
     .layout-standard { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
     .layout-compact  { grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .layout-poster   { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+    /* Responsive columns for Dense Outline (layout-compact) */
+    @media (max-width: 1200px) { .layout-compact { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px)  { .layout-compact { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .layout-compact { grid-template-columns: 1fr; } }
+    /* Poster Board: go single column on narrow screens */
+    @media (max-width: 900px)  { .layout-poster { grid-template-columns: 1fr; } }
 
     /* BASE MONTH CARD */
     .month { background: var(--bg-card); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; }
@@ -181,7 +181,7 @@
       const wrapper = document.getElementById('calendar-scale-wrapper');
       const calendar = document.getElementById('calendar');
       if (!wrapper || !calendar) return;
-      const DESIGN_WIDTH = 1200; // keep in sync with CSS --calendar-design-width
+      const DESIGN_WIDTH = 1400; // keep in sync with CSS --calendar-design-width
       const wrapperWidth = wrapper.clientWidth || window.innerWidth;
       const s = Math.min(1, wrapperWidth / DESIGN_WIDTH);
       if (Math.abs(s - currentScale) > 0.005) {
@@ -237,9 +237,9 @@
 
         const first = new Date(year, m, 1);
         let html = `<h3>${first.toLocaleString('default', { month: 'long' })}</h3>`;
-        html += `<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
+        html += `<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`;
 
-        for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
+        for (let i = 0; i < first.getDay(); i++) html += `<div class=\"day empty\"></div>`;
 
         const date = new Date(year, m, 1);
         while (date.getMonth() === m) {
@@ -250,7 +250,7 @@
           const type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
           const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
 
-          html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
+          html += `<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`;
           date.setDate(date.getDate() + 1);
         }
 
@@ -262,49 +262,37 @@
       requestAnimationFrame(applyAutoScale);
     }
 
-    // Download image (with guards + full restore + unscaled capture)
+    // Download image: render a fixed-width off-screen clone for a crisp PNG
     function downloadCalendar() {
-      const calendar = document.getElementById('calendar');
-      const wrapper  = document.getElementById('calendar-scale-wrapper');
       const year = getSelectedYear();
+      const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
 
-      // Save original inline styles to restore after capture
-      const original = {
-        wrapperTransform: wrapper ? wrapper.style.transform : '',
-        wrapperOrigin: wrapper ? wrapper.style.transformOrigin : '',
-        display: calendar.style.display,
-        gridTemplateColumns: calendar.style.gridTemplateColumns,
-        maxWidth: calendar.style.maxWidth
-      };
+      const live = document.getElementById('calendar');
+      const clone = live.cloneNode(true);
 
-      // 1) Disable screen scaling for a crisp capture
-      if (wrapper) {
-        wrapper.style.transform = 'none';
-        wrapper.style.transformOrigin = '';
-      }
+      // Force a tidy 3x4 grid at a fixed capture width
+      clone.style.display = 'grid';
+      clone.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      clone.style.width = '1200px';
+      clone.style.maxWidth = '1200px';
+      clone.style.margin = '0 auto';
 
-      // 2) Force 3x4 grid for a consistent, readable image
-      calendar.style.display = 'grid';
-      calendar.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      calendar.style.maxWidth = '1200px';
+      const host = document.createElement('div');
+      host.style.position = 'fixed';
+      host.style.left = '-99999px';
+      host.style.top = '0';
+      host.style.zIndex = '-1';
+      host.style.background = bg;
+      host.appendChild(clone);
+      document.body.appendChild(host);
 
       if (!window.html2canvas) {
         alert('Download library is still loading. Please wait a moment and try again.');
-        // Restore original + re-apply scale
-        if (wrapper) {
-          wrapper.style.transform = original.wrapperTransform;
-          wrapper.style.transformOrigin = original.wrapperOrigin;
-        }
-        calendar.style.display = original.display;
-        calendar.style.gridTemplateColumns = original.gridTemplateColumns;
-        calendar.style.maxWidth = original.maxWidth;
-        applyAutoScale();
+        document.body.removeChild(host);
         return;
       }
 
-      const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
-
-      window.html2canvas(calendar, { scale: 2, useCORS: true, backgroundColor: bg })
+      window.html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: bg, windowWidth: 1300 })
         .then(canvas => {
           const link = document.createElement('a');
           link.download = `Shift-Calendar-${year}.png`;
@@ -316,17 +304,7 @@
           alert('Sorry, generating the image failed. See the console for details.');
         })
         .finally(() => {
-          // 3) Restore original styles
-          if (wrapper) {
-            wrapper.style.transform = original.wrapperTransform;
-            wrapper.style.transformOrigin = original.wrapperOrigin;
-          }
-          calendar.style.display = original.display;
-          calendar.style.gridTemplateColumns = original.gridTemplateColumns;
-          calendar.style.maxWidth = original.maxWidth;
-
-          // Re-apply screen scaling after restore
-          applyAutoScale();
+          document.body.removeChild(host);
         });
     }
 
