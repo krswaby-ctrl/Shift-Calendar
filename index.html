@@ -4,73 +4,141 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
+
+  <!-- Keep your existing icon + manifest links (as requested) -->
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
+
   <style>
-    :root{--on-color:#3498db;--travel-color:#e67e22;--off-color:#ffffff;--text-main:#333;--bg-body:#f0f2f5;--bg-card:#ffffff;--border-color:#eee}
-    body.dark-mode{--off-color:#2c3e50;--text-main:#ecf0f1;--bg-body:#1a1a1a;--bg-card:#2d2d2d;--border-color:#444}
-    body{font-family:'Segoe UI',system-ui,sans-serif;padding:20px;background:var(--bg-body);color:var(--text-main);margin:0;transition:background .3s}
-    .header-container{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:15px}
-    .legend{display:flex;gap:15px;background:var(--bg-card);padding:10px 15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-    .legend-item{display:flex;align-items:center;gap:6px;font-size:.85em;font-weight:600}
-    .dot{width:12px;height:12px;border-radius:50%;border:1px solid #ddd}
-    .controls{background:var(--bg-card);padding:20px;border-radius:12px;display:flex;gap:15px;flex-wrap:wrap;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,.1);align-items:flex-end}
-    .control-group{display:flex;flex-direction:column;gap:4px}
-    label{font-weight:600;font-size:.85em;color:var(--text-main);opacity:.8}
-    input,select{padding:8px;border:1px solid var(--border-color);border-radius:6px;width:140px;background:var(--bg-card);color:var(--text-main)}
-    .btn{padding:10px 18px;border-radius:6px;cursor:pointer;font-weight:bold;border:none;transition:.2s}
-    .btn-gen{background:#2ecc71;color:#fff}.btn-dark{background:#34495e;color:#fff}.btn-print{background:#95a5a6;color:#fff}
-    .calendar-grid{display:grid;gap:20px}
-    /* Auto-scale wrapper */
-    #calendar-scale-wrapper{--calendar-design-width:1400px;width:100%;display:flex;justify-content:center;overflow:visible}
-    #calendar-scale-wrapper > #calendar{max-width:var(--calendar-design-width)}
-    @media print{#calendar-scale-wrapper{transform:none !important}}
-    /* Layouts */
-    .layout-standard{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-    .layout-compact{grid-template-columns:repeat(4,1fr);gap:10px}
-    .layout-poster{grid-template-columns:repeat(2,1fr);gap:24px}
-    @media(max-width:1200px){.layout-compact{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:900px){.layout-compact{grid-template-columns:repeat(2,1fr)}.layout-poster{grid-template-columns:1fr}}
-    @media(max-width:600px){.layout-compact{grid-template-columns:1fr}}
-    /* Month card */
-    .month{background:var(--bg-card);border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);padding:15px}
-    h3{text-align:center;color:var(--on-color);border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-top:0}
-    .weekday-header,.days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}
-    .weekday-header{font-weight:bold;color:#999;font-size:.75em;margin-bottom:8px}
-    .day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.85em;border:1px solid transparent}
-    .on-shift{background:var(--on-color)!important;color:#fff;font-weight:bold}
-    .travel-day{background:var(--travel-color)!important;color:#fff;font-weight:bold}
-    .off-day{background:var(--off-color);color:var(--text-main);border-color:var(--border-color)}
-    .today{border:2px solid #e74c3c!important}
-    .empty{visibility:hidden}
-    input[type=color]{padding:0;height:38px;cursor:pointer}
-    .theme-standard .month{border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.08)}
-    .theme-standard .day{border-radius:50%}
-    .theme-outline .month{box-shadow:none;border:1px solid var(--border-color);border-radius:8px}
-    .theme-outline h3{color:var(--text-main);background:rgba(0,0,0,.03);border:none;padding:10px;border-radius:6px}
-    .theme-outline .day{border-radius:4px;border:1px solid var(--border-color);background:transparent;font-size:.8em}
-    .theme-outline .off-day{background:transparent}
-    .theme-outline .weekday-header{color:#777}
-    .theme-poster .month{border-radius:14px;background:linear-gradient(145deg,rgba(52,152,219,.08),rgba(230,126,34,.08));box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden}
-    .theme-poster h3{color:#fff;margin:-15px -15px 12px -15px;padding:14px 10px;background:linear-gradient(135deg,var(--on-color),var(--travel-color));border:none}
-    .theme-poster .weekday-header{color:#666;font-weight:700}
-    .theme-poster .day{border-radius:0;border:1px dashed transparent;background:rgba(255,255,255,.6)}
-    .theme-poster .off-day{background:rgba(255,255,255,.3)}
-    .theme-poster .today{border-color:#e74c3c!important}
+    :root {
+      --on-color: #3498db;
+      --travel-color: #e67e22;
+      --off-color: #ffffff;
+      --text-main: #333;
+      --bg-body: #f0f2f5;
+      --bg-card: #ffffff;
+      --border-color: #eee;
+    }
+    body.dark-mode {
+      --off-color: #2c3e50;
+      --text-main: #ecf0f1;
+      --bg-body: #1a1a1a;
+      --bg-card: #2d2d2d;
+      --border-color: #444;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 20px;
+      background: var(--bg-body);
+      color: var(--text-main);
+      margin: 0;
+      transition: background 0.3s;
+    }
+
+    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .legend { display: flex; gap: 15px; background: var(--bg-card); padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ddd; }
+
+    .controls { background: var(--bg-card); padding: 20px; border-radius: 12px; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); align-items: flex-end; }
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+    label { font-weight: 600; font-size: 0.85em; color: var(--text-main); opacity: 0.8; }
+    input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; width: 140px; background: var(--bg-card); color: var(--text-main); }
+
+    .btn { padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
+    .btn-gen  { background: #2ecc71; color: white; }
+    .btn-dark { background: #34495e; color: white; }
+    .btn-print{ background: #95a5a6; color: white; }
+
+    .calendar-grid { display: grid; gap: 20px; }
+
+    /* Auto-scale wrapper: scales the whole calendar down on small screens */
+    #calendar-scale-wrapper {
+      /* Desktop design width for main view */
+      --calendar-design-width: 1600px; /* bumped from 1400 */
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      overflow: visible;
+    }
+    /* IMPORTANT: literal child combinator (not escaped) */
+    #calendar-scale-wrapper > #calendar { max-width: var(--calendar-design-width); }
+
+    /* Never scale for printing (full fidelity output) */
+    @media print { #calendar-scale-wrapper { transform: none !important; } }
+
+    /* LAYOUTS */
+    .layout-standard { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .layout-compact  { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    /* Poster Board: wider on desktop */
+    .layout-poster   { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+    /* Responsive columns for Dense Outline (layout-compact) */
+    @media (max-width: 1200px) { .layout-compact { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px)  { .layout-compact { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .layout-compact { grid-template-columns: 1fr; } }
+
+    /* Poster Board step down */
+    @media (max-width: 1200px) { .layout-poster { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px)  { .layout-poster { grid-template-columns: 1fr; } }
+
+    /* BASE MONTH CARD */
+    .month { background: var(--bg-card); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; }
+    h3 { text-align: center; color: var(--on-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0; }
+
+    .weekday-header, .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+    .weekday-header { font-weight: bold; color: #999; font-size: 0.75em; margin-bottom: 8px; }
+    .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.85em; border: 1px solid transparent; }
+    .on-shift   { background: var(--on-color) !important; color: white; font-weight: bold; }
+    .travel-day { background: var(--travel-color) !important; color: white; font-weight: bold; }
+    .off-day    { background: var(--off-color); color: var(--text-main); border-color: var(--border-color); }
+    .today      { border: 2px solid #e74c3c !important; }
+    .empty { visibility: hidden; }
+
+    input[type="color"] { padding: 0; height: 38px; cursor: pointer; }
+
+    /* ===== THEMES (VISUALS) ===== */
+    .theme-standard .month { border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+    .theme-standard .day { border-radius: 50%; }
+
+    .theme-outline .month { box-shadow: none; border: 1px solid var(--border-color); border-radius: 8px; }
+    .theme-outline h3 { color: var(--text-main); background: rgba(0,0,0,0.03); border: none; padding: 10px; border-radius: 6px; }
+    .theme-outline .day { border-radius: 4px; border: 1px solid var(--border-color); background: transparent; font-size: 0.8em; }
+    .theme-outline .off-day { background: transparent; }
+    .theme-outline .weekday-header { color: #777; }
+
+    .theme-poster .month {
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(52,152,219,.08), rgba(230,126,34,.08));
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .theme-poster h3 {
+      color: white;
+      margin: -15px -15px 12px -15px;
+      padding: 14px 10px;
+      background: linear-gradient(135deg, var(--on-color), var(--travel-color));
+      border: none;
+    }
+    .theme-poster .weekday-header { color: #666; font-weight: 700; }
+    .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
+    .theme-poster .off-day { background: rgba(255,255,255,0.3); }
+    .theme-poster .today { border-color: #e74c3c !important; }
+
     /* Print */
-    @media print{
-      @page{size:auto;margin:.25in}
-      .controls,.btn-print,.btn-dark{display:none!important}
-      .header-container,.legend{display:none!important}
-      #calendar-scale-wrapper{transform:none!important;width:100%!important}
-      #calendar-scale-wrapper > #calendar{width:100%!important;max-width:none!important}
-      body{background:#fff!important;color:#000!important;padding:0!important}
-      .calendar-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
-      .month{border:1px solid #ddd!important;box-shadow:none!important;page-break-inside:avoid;padding:10px!important;font-size:.9rem!important;background:#fff!important}
-      .weekday-header{color:#666!important}
+    @media print {
+      @page { size: auto; margin: 0.25in; }
+      .controls, .btn-print, .btn-dark { display: none !important; }
+      /* Keep title & legend visible on print */
+      #calendar-scale-wrapper { transform: none !important; width: 100% !important; }
+      #calendar-scale-wrapper > #calendar { width: 100% !important; max-width: none !important; }
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+      .month { border: 1px solid #ddd !important; box-shadow: none !important; page-break-inside: avoid; padding: 10px !important; font-size: 0.9rem !important; background: white !important; }
+      .weekday-header { color: #666 !important; }
     }
   </style>
 </head>
@@ -78,45 +146,233 @@
   <div class="header-container">
     <h2 id="pageTitle">North Slope Shift Calendar</h2>
     <div class="legend">
-      <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
-      <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
-      <div class="legend-item"><div class="dot" style="background:var(--off-color);"></div> Off</div>
+      <div class="legend-item"><div class="dot" style="background: var(--on-color);"></div> Work</div>
+      <div class="legend-item"><div class="dot" style="background: var(--travel-color);"></div> Travel</div>
+      <div class="legend-item"><div class="dot" style="background: var(--off-color);"></div> Off</div>
     </div>
   </div>
+
   <div class="controls">
-    <div class="control-group"><label for="yearSelect">Year</label><input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()"></div>
-    <div class="control-group"><label for="daysOn">Days ON</label><input type="number" id="daysOn" value="21"></div>
-    <div class="control-group"><label for="daysOff">Days OFF</label><input type="number" id="daysOff" value="21"></div>
-    <div class="control-group"><label for="startDate">1st Day ON</label><input type="date" id="startDate" value="2026-01-08"></div>
-    <div class="control-group"><label for="layoutStyle">Style</label>
+    <div class="control-group">
+      <label for="yearSelect">Year</label>
+      <input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()">
+    </div>
+    <div class="control-group">
+      <label for="daysOn">Days ON</label>
+      <input type="number" id="daysOn" min="1" step="1" value="21">
+    </div>
+    <div class="control-group">
+      <label for="daysOff">Days OFF</label>
+      <input type="number" id="daysOff" min="1" step="1" value="21">
+    </div>
+    <div class="control-group">
+      <label for="startDate">1st Day ON</label>
+      <input type="date" id="startDate" value="2026-01-08">
+    </div>
+
+    <div class="control-group">
+      <label for="layoutStyle">Style</label>
       <select id="layoutStyle" onchange="generateCalendar()">
         <option value="layout-standard theme-standard">Classic Cards</option>
         <option value="layout-compact theme-outline">Dense Outline</option>
         <option value="layout-poster theme-poster">Poster Board</option>
       </select>
     </div>
+
     <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()" aria-label="Work color"></div>
     <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()" aria-label="Travel color"></div>
+
     <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
-    <button type="button" class="btn btn-dark" onclick="document.body.classList.toggle('dark-mode')">Dark Mode</button>
+    <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
+
     <button type="button" class="btn btn-print" onclick="window.print()">Print PDF</button>
-    <span style="font-size:.75em;opacity:.7;margin-left:6px;color:var(--text-main);">*Enable "Background graphics" in print settings.</span>
-    <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendar()">Download Image</button>
+    <span style="font-size: 0.75em; opacity: 0.7; margin-left: 6px; color: var(--text-main);">*Enable "Background graphics" in print settings.</span>
+
+    <button type="button" class="btn" style="background: #3498db; color: white;" onclick="downloadCalendar()">Download Image</button>
+
+    <!-- Hidden capture width knob (per-device, not shared) -->
+    <input type="hidden" id="captureWidth" value="1800">
   </div>
+
   <div id="calendar-scale-wrapper">
     <div id="calendar" class="calendar-grid"></div>
   </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <script>
-    let currentScale=1;
-    function applyAutoScale(){const e=document.getElementById('calendar-scale-wrapper'),t=document.getElementById('calendar');if(!e||!t)return;const n=1400,o=e.clientWidth||window.innerWidth,c=Math.min(1,o/n);Math.abs(c-currentScale)>.005&&(currentScale=c,e.style.transformOrigin='top center',e.style.transform=`scale(${c})`)}
-    function initAutoScale(){applyAutoScale(),window.ResizeObserver?(new ResizeObserver(()=>applyAutoScale())).observe(document.getElementById('calendar-scale-wrapper')):window.addEventListener('resize',applyAutoScale)}
-    function updateColors(){document.documentElement.style.setProperty('--on-color',document.getElementById('workColor').value),document.documentElement.style.setProperty('--travel-color',document.getElementById('travelColor').value)}
-    function getSelectedYear(){const e=parseInt(document.getElementById('yearSelect').value,10);return Number.isFinite(e)?e:(new Date).getFullYear()}
-    function handleYearChange(){generateCalendar()}
-    function generateCalendar(){const e=parseInt(document.getElementById('daysOn').value,10)||21,t=parseInt(document.getElementById('daysOff').value,10)||21,n=document.getElementById('startDate').value||'2026-01-08',o=getSelectedYear(),c=document.getElementById('layoutStyle').value,d=new Date(n+'T00:00:00'),a=new Date;a.setHours(0,0,0,0);const l=document.getElementById('calendar');l.className='calendar-grid '+c,l.innerHTML='';const r=e+t;for(let s=0;s<12;s++){const i=document.createElement('div');i.className='month';const m=new Date(o,s,1);let p=`<h3>${m.toLocaleString('default',{month:'long'})}</h3>`;p+='<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">';for(let g=0;g<m.getDay();g++)p+='<div class="day empty"></div>';const y=new Date(o,s,1);for(;y.getMonth()===s;){const h=Math.round((y.getTime()-d.getTime())/86400000);let v=h%r;v<0&&(v+=r);const u=0===v||v===e?'travel-day':v>0&&v<e?'on-shift':'off-day',w=y.getTime()===a.getTime()?'today':'';p+=`<div class="day ${u} ${w}">${y.getDate()}</div>`,y.setDate(y.getDate()+1)}i.innerHTML=p+'</div>',l.appendChild(i)}requestAnimationFrame(applyAutoScale)}
-    function downloadCalendar(){const e=getSelectedYear(),t=document.body.classList.contains('dark-mode')?'#1a1a1a':'#ffffff',n=document.getElementById('calendar'),o=n.cloneNode(!0),c=1800;o.style&&(o.style.display='grid',o.style.gridTemplateColumns='repeat(3, 1fr)',o.style.width=c+'px',o.style.maxWidth=c+'px',o.style.margin='0 auto');const d=document.createElement('div');if(d.style.position='fixed',d.style.left='-99999px',d.style.top='0',d.style.zIndex='-1',d.style.background=t,d.appendChild(o),document.body.appendChild(d),!window.html2canvas)return alert('Download library is still loading. Please wait a moment and try again.'),void document.body.removeChild(d);window.html2canvas(o,{scale:2,useCORS:!0,backgroundColor:t,windowWidth:c+100}).then(a=>{const l=document.createElement('a');l.download=`Shift-Calendar-${e}.png`,l.href=a.toDataURL('image/png'),l.click()}).catch(a=>{console.error('html2canvas failed:',a),alert('Sorry, generating the image failed. See the console for details.')}).finally(()=>{document.body.removeChild(d)})}
-    document.title='North Slope Shift Calendar',(()=>{const e=document.getElementById('pageTitle');e&&(e.textContent='North Slope Shift Calendar')})(),generateCalendar(),initAutoScale();
+    /* ========= Local Storage (per browser, per user) ========= */
+    const LS_KEYS = {
+      year: 'sc_year', on: 'sc_daysOn', off: 'sc_daysOff', start: 'sc_start',
+      style: 'sc_style', work: 'sc_workColor', travel: 'sc_travelColor', dark: 'sc_darkMode',
+      capture: 'sc_captureWidth'
+    };
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(LS_KEYS.year, document.getElementById('yearSelect').value);
+        localStorage.setItem(LS_KEYS.on, document.getElementById('daysOn').value);
+        localStorage.setItem(LS_KEYS.off, document.getElementById('daysOff').value);
+        localStorage.setItem(LS_KEYS.start, document.getElementById('startDate').value);
+        localStorage.setItem(LS_KEYS.style, document.getElementById('layoutStyle').value);
+        localStorage.setItem(LS_KEYS.work, document.getElementById('workColor').value);
+        localStorage.setItem(LS_KEYS.travel, document.getElementById('travelColor').value);
+        localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1' : '0');
+        const cap = document.getElementById('captureWidth');
+        if (cap) localStorage.setItem(LS_KEYS.capture, cap.value);
+      } catch (e) { /* ignore quota errors */ }
+    }
+
+    function loadSettings() {
+      try {
+        const setIf = (id, key) => { const v = localStorage.getItem(key); if (v) document.getElementById(id).value = v; };
+        setIf('yearSelect', LS_KEYS.year);
+        setIf('daysOn', LS_KEYS.on);
+        setIf('daysOff', LS_KEYS.off);
+        setIf('startDate', LS_KEYS.start);
+        setIf('layoutStyle', LS_KEYS.style);
+        setIf('workColor', LS_KEYS.work);
+        setIf('travelColor', LS_KEYS.travel);
+        const cap = localStorage.getItem(LS_KEYS.capture); if (cap && document.getElementById('captureWidth')) document.getElementById('captureWidth').value = cap;
+        // Dark mode preference
+        const dark = localStorage.getItem(LS_KEYS.dark); if (dark === '1') document.body.classList.add('dark-mode');
+      } catch (e) { /* ignore */ }
+    }
+
+    /* ========= Colors & Autoscale ========= */
+    let currentScale = 1;
+    function updateColors() {
+      document.documentElement.style.setProperty('--on-color', document.getElementById('workColor').value);
+      document.documentElement.style.setProperty('--travel-color', document.getElementById('travelColor').value);
+      saveSettings();
+    }
+
+    function applyAutoScale() {
+      const wrapper = document.getElementById('calendar-scale-wrapper');
+      const calendar = document.getElementById('calendar');
+      if (!wrapper || !calendar) return;
+      const DESIGN_WIDTH = 1600; // keep in sync with CSS
+      const wrapperWidth = wrapper.clientWidth || window.innerWidth;
+      const s = Math.min(1, wrapperWidth / DESIGN_WIDTH);
+      if (Math.abs(s - currentScale) > 0.005) {
+        currentScale = s;
+        wrapper.style.transformOrigin = 'top center';
+        wrapper.style.transform = `scale(${s})`;
+      }
+    }
+
+    function initAutoScale() {
+      applyAutoScale();
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => applyAutoScale());
+        ro.observe(document.getElementById('calendar-scale-wrapper'));
+      } else {
+        window.addEventListener('resize', applyAutoScale);
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      saveSettings();
+    }
+
+    /* ========= Year / Generation ========= */
+    function getSelectedYear() {
+      const y = parseInt(document.getElementById('yearSelect').value, 10);
+      return Number.isFinite(y) ? y : (new Date()).getFullYear();
+    }
+    function handleYearChange() { generateCalendar(); saveSettings(); }
+
+    function generateCalendar() {
+      const daysOn  = parseInt(document.getElementById('daysOn').value, 10)  || 21;
+      const daysOff = parseInt(document.getElementById('daysOff').value, 10) || 21;
+      const startInput = document.getElementById('startDate').value || "2026-01-08";
+      const year = getSelectedYear();
+
+      const layoutClasses = document.getElementById('layoutStyle').value; // layout + theme classes
+      const startShift = new Date(startInput + "T00:00:00");
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const container = document.getElementById('calendar');
+      container.className = 'calendar-grid ' + layoutClasses;
+      container.innerHTML = '';
+
+      const cycle = daysOn + daysOff;
+
+      for (let m = 0; m < 12; m++) {
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'month';
+
+        const first = new Date(year, m, 1);
+        let html = `<h3>${first.toLocaleString('default', { month: 'long' })}</h3>`;
+        html += `<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
+
+        for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
+
+        const date = new Date(year, m, 1);
+        while (date.getMonth() === m) {
+          const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
+          let pos = diff % cycle; if (pos < 0) pos += cycle;
+          const type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
+          const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
+          html += `<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
+          date.setDate(date.getDate() + 1);
+        }
+
+        monthDiv.innerHTML = html + `</div>`;
+        container.appendChild(monthDiv);
+      }
+
+      // Save current selection to localStorage and re-apply scaling
+      saveSettings();
+      requestAnimationFrame(applyAutoScale);
+    }
+
+    /* ========= Download (off-screen clone) ========= */
+    function downloadCalendar() {
+      const year = getSelectedYear();
+      const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
+      const capInput = document.getElementById('captureWidth');
+      const CAPTURE_WIDTH = parseInt(capInput?.value || '1800', 10);
+
+      const live = document.getElementById('calendar');
+      const clone = live.cloneNode(true);
+      clone.style.display = 'grid';
+      clone.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      clone.style.width = CAPTURE_WIDTH + 'px';
+      clone.style.maxWidth = CAPTURE_WIDTH + 'px';
+      clone.style.margin = '0 auto';
+
+      const host = document.createElement('div');
+      host.style.position = 'fixed'; host.style.left = '-99999px'; host.style.top = '0';
+      host.style.zIndex = '-1'; host.style.background = bg;
+      host.appendChild(clone); document.body.appendChild(host);
+
+      if (!window.html2canvas) { alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; }
+
+      window.html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: bg, windowWidth: CAPTURE_WIDTH + 100 })
+        .then(canvas => { const link = document.createElement('a'); link.download = `Shift-Calendar-${year}.png`; link.href = canvas.toDataURL('image/png'); link.click(); })
+        .catch(err => { console.error('html2canvas failed:', err); alert('Sorry, generating the image failed. See the console for details.'); })
+        .finally(() => { document.body.removeChild(host); });
+    }
+
+    // Minimal Option B: static titles once (no dynamic year)
+    document.title = 'North Slope Shift Calendar';
+    (function(){ const h = document.getElementById('pageTitle'); if (h) h.textContent = 'North Slope Shift Calendar'; })();
+
+    // Load any saved settings, apply colors, then render & init
+    loadSettings();
+    updateColors();
+    generateCalendar();
+    initAutoScale();
+
+    // Persist on changes
+    document.getElementById('layoutStyle').addEventListener('change', saveSettings);
+    document.getElementById('daysOn').addEventListener('input', saveSettings);
+    document.getElementById('daysOff').addEventListener('input', saveSettings);
+    document.getElementById('startDate').addEventListener('input', saveSettings);
+    document.getElementById('workColor').addEventListener('input', saveSettings);
+    document.getElementById('travelColor').addEventListener('input', saveSettings);
   </script>
 </body>
 </html>
