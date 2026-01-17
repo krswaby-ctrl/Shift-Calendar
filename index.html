@@ -112,14 +112,59 @@
     .theme-poster .day { border-radius: 0; border: 1px dashed transparent; background: rgba(255,255,255,0.6); }
     .theme-poster .off-day { background: rgba(255,255,255,0.3); }
     .theme-poster .today { border-color: #e74c3c !important; }
+  
+/* Print */
+@media print {
+  /* Use most of the paper and remove browser default margins */
+  @page {
+    size: auto;           /* let the browser choose (Letter/A4, Portrait) */
+    margin: 0.25in;       /* tighten margins so grid fills the page */
+  }
 
-    /* Print */
-    @media print {
-      .controls, .btn-print, .btn-dark { display: none !important; }
-      body { background: white !important; color: black !important; padding: 0 !important; }
-      .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
-      .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; font-size: 0.8rem !important; }
-    }
+  /* Hide on-screen controls and optional header/legend for a full page */
+  .controls, .btn-print, .btn-dark { display: none !important; }
+  .header-container, .legend { display: none !important; } /* ← remove this line if you want to keep the title/legend */
+
+  /* Uncap widths so the calendar can stretch edge-to-edge */
+  #calendar-scale-wrapper {
+    transform: none !important; /* ensure no scaling in print */
+    width: 100% !important;
+  }
+  #calendar-scale-wrapper > #calendar {
+    width: 100% !important;
+    max-width: none !important;  /* remove the 1400px cap in print */
+  }
+
+  /* Page background/text */
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;       /* no extra padding around the page */
+  }
+
+  /* 3×4 grid that fills the page with tighter gaps */
+  .calendar-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;         /* modest gap looks better on paper */
+  }
+
+  /* Cards optimized for print (lighter chrome, compact padding) */
+  .month {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    padding: 10px !important;    /* slightly tighter than screen */
+    font-size: 0.9rem !important;/* a touch larger for readability */
+    background: white !important;
+  }
+
+  /* Slightly darker weekday labels on paper */
+  .weekday-header { color: #666 !important; }
+
+  /* Circles/borders print better with Background graphics ON */
+}
+
   </style>
 </head>
 <body>
