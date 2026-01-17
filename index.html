@@ -145,7 +145,17 @@ const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
 
 function downloadCalendar() {
     const calendar = document.getElementById('calendar');
-    html2canvas(calendar, { 
+    
+    // Save original styles to restore them later
+    const originalGridTemplate = calendar.style.gridTemplateColumns;
+    const originalMaxWidth = calendar.style.maxWidth;
+
+    // Force 3x4 Grid Layout for the screenshot
+    calendar.style.display = 'grid';
+    calendar.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    calendar.style.maxWidth = '1200px'; // Adjust width to ensure 3 columns fit nicely
+
+    html2canvas(calendar, {
         scale: 2,
         useCORS: true,
         backgroundColor: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff'
@@ -154,13 +164,19 @@ function downloadCalendar() {
         link.download = 'Shift-Calendar-2026.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+
+        // Restore original layout back to the screen version
+        calendar.style.gridTemplateColumns = originalGridTemplate;
+        calendar.style.maxWidth = originalMaxWidth;
     });
 }
+        
 generateCalendar();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
+
 
 
 
