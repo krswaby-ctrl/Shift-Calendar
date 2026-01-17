@@ -58,13 +58,12 @@
     /* Auto-scale wrapper: scales the whole calendar down on small screens */
     #calendar-scale-wrapper {
       /* “Design width” the layout targets on desktop; matches main screen width */
-      --calendar-design-width: 1400px; /* was 1200px */
+      --calendar-design-width: 1400px;
       width: 100%;
       display: flex;
-      justify-content: center;    /* keep it centered when scaled */
-      overflow: visible;          /* avoid clipping shadows/edges */
+      justify-content: center;
+      overflow: visible;
     }
-    /* Keep the inner calendar’s max width aligned with the design width */
     #calendar-scale-wrapper > #calendar { max-width: var(--calendar-design-width); }
 
     /* Never scale for printing (full fidelity output) */
@@ -79,7 +78,7 @@
     @media (max-width: 1200px) { .layout-compact { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 900px)  { .layout-compact { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px)  { .layout-compact { grid-template-columns: 1fr; } }
-    /* Poster Board: go single column on narrow screens */
+    /* Poster Board single column */
     @media (max-width: 900px)  { .layout-poster { grid-template-columns: 1fr; } }
 
     /* BASE MONTH CARD */
@@ -119,7 +118,7 @@
       .controls, .btn-print, .btn-dark { display: none !important; }
       body { background: white !important; color: black !important; padding: 0 !important; }
       .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
-      .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; font-size: 0.8rem !important; /* fits on one page */ }
+      .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; font-size: 0.8rem !important; }
     }
   </style>
 </head>
@@ -134,7 +133,6 @@
   </div>
 
   <div class="controls">
-    <!-- Year selector -->
     <div class="control-group">
       <label for="yearSelect">Year</label>
       <input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()">
@@ -146,7 +144,6 @@
 
     <div class="control-group">
       <label for="layoutStyle">Style</label>
-      <!-- Applies both layout and theme classes -->
       <select id="layoutStyle" onchange="generateCalendar()">
         <option value="layout-standard theme-standard">Classic Cards</option>
         <option value="layout-compact theme-outline">Dense Outline</option>
@@ -166,12 +163,10 @@
     <button type="button" class="btn" style="background: #3498db; color: white;" onclick="downloadCalendar()">Download Image</button>
   </div>
 
-  <!-- Fixed-width virtual canvas + a transform wrapper that scales down on small screens -->
   <div id="calendar-scale-wrapper">
     <div id="calendar" class="calendar-grid"></div>
   </div>
 
-  <!-- Load html2canvas BEFORE our inline script (no SRI/crossorigin to avoid blocks) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
@@ -201,20 +196,17 @@
     }
     // ---------- /Auto-scale ----------
 
-    // Color updates
     function updateColors() {
       document.documentElement.style.setProperty('--on-color', document.getElementById('workColor').value);
       document.documentElement.style.setProperty('--travel-color', document.getElementById('travelColor').value);
     }
 
-    // Year handling
     function getSelectedYear() {
       const y = parseInt(document.getElementById('yearSelect').value, 10);
       return Number.isFinite(y) ? y : (new Date()).getFullYear();
     }
     function handleYearChange() { generateCalendar(); }
 
-    // Calendar generation
     function generateCalendar() {
       const daysOn  = parseInt(document.getElementById('daysOn').value, 10)  || 21;
       const daysOff = parseInt(document.getElementById('daysOff').value, 10) || 21;
@@ -258,25 +250,29 @@
         container.appendChild(monthDiv);
       }
 
-      // Re-apply scaling in case the layout changed
       requestAnimationFrame(applyAutoScale);
     }
 
-    // Download image: render a fixed-width off-screen clone for a crisp PNG
+    // Download image: fixed-width off-screen clone for crisp PNG
     function downloadCalendar() {
       const year = getSelectedYear();
       const bg = document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#ffffff';
 
+      // Clone the live calendar
       const live = document.getElementById('calendar');
       const clone = live.cloneNode(true);
+
+      // Desired capture width (wider = less "scrunched")
+      const CAPTURE_WIDTH = 1800; // was 1200
 
       // Force a tidy 3x4 grid at a fixed capture width
       clone.style.display = 'grid';
       clone.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      clone.style.width = '1200px';
-      clone.style.maxWidth = '1200px';
+      clone.style.width = CAPTURE_WIDTH + 'px';
+      clone.style.maxWidth = CAPTURE_WIDTH + 'px';
       clone.style.margin = '0 auto';
 
+      // Off-screen host
       const host = document.createElement('div');
       host.style.position = 'fixed';
       host.style.left = '-99999px';
@@ -292,7 +288,12 @@
         return;
       }
 
-      window.html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: bg, windowWidth: 1300 })
+      window.html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: bg,
+        windowWidth: CAPTURE_WIDTH + 100
+      })
         .then(canvas => {
           const link = document.createElement('a');
           link.download = `Shift-Calendar-${year}.png`;
@@ -308,14 +309,9 @@
         });
     }
 
-    // Minimal Option B: set static titles once (no dynamic year)
     document.title = 'North Slope Shift Calendar';
-    (function(){
-      const h = document.getElementById('pageTitle');
-      if (h) h.textContent = 'North Slope Shift Calendar';
-    })();
+    (function(){ const h = document.getElementById('pageTitle'); if (h) h.textContent = 'North Slope Shift Calendar'; })();
 
-    // Initial render
     generateCalendar();
     initAutoScale();
   </script>
