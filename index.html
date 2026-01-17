@@ -99,7 +99,7 @@
 </head>
 <body>
 
-  <!-- Capture root = header (with centered name) + calendar, so print & download get both -->
+  <!-- Capture root = header + controls + calendar so print & download can include/exclude as needed -->
   <div id="calendar-capture-root">
     <div class="header-container">
       <h2 id="pageTitle">North Slope Shift Calendar</h2>
@@ -202,6 +202,9 @@
       const liveRoot=document.getElementById('calendar-capture-root');
       const cloneRoot=liveRoot.cloneNode(true);
 
+      /* Remove the entire controls section from the clone */
+      cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove());
+
       /* Make the name appear as plain text: remove label, neutralize styles */
       cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
       const chip=cloneRoot.querySelector('.name-chip');
@@ -231,7 +234,7 @@
 
       /* Capture exactly the width we built, at hi-DPI */
       window.html2canvas(cloneRoot, {
-        scale: 2.5,                 // higher DPI for extra crispness
+        scale: 2.5,                 // higher DPI for crisp output
         useCORS: true,
         backgroundColor: bg,
         width: CAPTURE_WIDTH,
