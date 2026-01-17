@@ -60,11 +60,20 @@
     cursor: pointer;
 }
         @media print {
-            .controls, .btn-print, .btn-dark { display: none !important; }
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
-            .month { border: 1px solid #eee !important; box-shadow: none !important; page-break-inside: avoid; }
-        }
+    .controls, .btn-print, .btn-dark { display: none !important; }
+    body { background: white !important; color: black !important; padding: 0 !important; }
+    .calendar-grid { 
+        display: grid !important; 
+        grid-template-columns: repeat(3, 1fr) !important; 
+        gap: 5px !important; 
+    }
+    .month { 
+        border: 1px solid #eee !important; 
+        box-shadow: none !important; 
+        page-break-inside: avoid; 
+        font-size: 0.8rem !important; /* This helps it fit on one page */
+    }
+}
     </style>
 </head>
 <body>
@@ -119,7 +128,7 @@
                 for (let i = 0; i < first.getDay(); i++) html += `<div class="day empty"></div>`;
                 const date = new Date(2026, m, 1);
                 while (date.getMonth() === m) {
-                    const diff = Math.floor((date.getTime() - startShift.getTime()) / 86400000);
+                    const diff = Math.round((date.getTime() - startShift.getTime()) / 86400000);
                     let pos = diff % cycle; if (pos < 0) pos += cycle;
                     let type = (pos === 0 || pos === daysOn) ? 'travel-day' : (pos > 0 && pos < daysOn) ? 'on-shift' : 'off-day';
                     const isToday = (date.getTime() === today.getTime()) ? 'today' : '';
@@ -134,6 +143,7 @@
     </script>
 </body>
 </html>
+
 
 
 
