@@ -68,6 +68,29 @@
     .btn-print{ background: #95a5a6; color: white; }
 
     .calendar-grid { display: grid; gap: 20px; }
+    
+/* Auto-scale wrapper: scales the whole calendar down on small screens */
+#calendar-scale-wrapper {
+  /* “Design width” the layout targets on desktop; matches download width */
+  --calendar-design-width: 1200px;
+
+  width: 100%;
+  display: flex;
+  justify-content: center;    /* keep it centered when scaled */
+  overflow: visible;          /* avoid clipping shadows/edges */
+}
+
+/* Keep the inner calendar’s max width aligned with the design width */
+#calendar-scale-wrapper > #calendar {
+  max-width: var(--calendar-design-width);
+}
+
+/* Never scale for printing (full fidelity output) */
+@media print {
+  #calendar-scale-wrapper {
+    transform: none !important;
+  }
+}
 
     /* LAYOUTS */
     .layout-standard { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
@@ -188,7 +211,11 @@
     <button type="button" class="btn" style="background: #3498db; color: white;" onclick="downloadCalendar()">Download Image</button>
   </div>
 
+<!-- Fixed-width virtual canvas + a transform wrapper that scales down on small screens -->
+<div id="calendar-scale-wrapper">
   <div id="calendar" class="calendar-grid"></div>
+</div>
+
 
   <!-- Load html2canvas BEFORE our inline script (no SRI/crossorigin to avoid blocks) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
