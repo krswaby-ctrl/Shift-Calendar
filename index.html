@@ -27,7 +27,7 @@
     body { font-family:'Segoe UI',system-ui,sans-serif; padding:20px; background:var(--bg-body); color:var(--text-main); margin:0; transition:background .3s,color .3s; }
 
     /* Header with centered name */
-    .header-container { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; margin-bottom:14px; }
+    .header-container { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; margin-bottom:10px; }
     #pageTitle { justify-self:start; margin:0; font-size:1.5rem; font-weight:800; }
     .legend { justify-self:end; display:flex; gap:15px; background:var(--bg-card); padding:10px 15px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); font-size:1rem; font-weight:700; }
     .legend-item{ display:flex; align-items:center; gap:6px; }
@@ -40,13 +40,13 @@
     .name-chip .value{ font-size:1.1rem; }
     #nameInline{ display:none; }
 
-    /* Controls */
-    .controls{ background:var(--bg-card); padding:20px; border-radius:12px; display:flex; gap:15px; flex-wrap:wrap; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,.1); align-items:flex-end; }
-    .control-group{ display:flex; flex-direction:column; gap:4px; }
-    label{ font-weight:700; font-size:.95em; color:var(--text-main); opacity:.9; }
-    input,select{ padding:10px; border:1px solid var(--border-color); border-radius:6px; width:220px; max-width:60vw; background:var(--bg-card); color:var(--text-main); }
-    input[type=range]{ width:240px; }
-    .btn{ padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; }
+    /* Controls (base) */
+    .controls{ background:var(--bg-card); padding:14px; border-radius:12px; gap:10px; row-gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.1); align-items:end; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+    .control-group{ display:flex; flex-direction:column; gap:2px; }
+    label{ font-weight:700; font-size:.85em; color:var(--text-main); opacity:.9; }
+    input,select{ padding:6px 8px; border:1px solid var(--border-color); border-radius:5px; width:170px; max-width:42vw; background:var(--bg-card); color:var(--text-main); font-size:.95rem; }
+    input[type=range]{ width:180px; }
+    .btn{ padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; font-size:.95rem; }
     .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; }
 
     /* Grid container */
@@ -58,7 +58,7 @@
     .layout-wall{     --month-min:360px; grid-template-columns:repeat(auto-fit,minmax(var(--month-min),1fr)); gap:20px; }
 
     /* Auto-scale wrapper */
-    #calendar-scale-wrapper{ --calendar-design-width:1600px; width:100%; display:flex; justify-content:center; overflow:visible; }
+    #calendar-scale-wrapper{ --calendar-design-width:1600px; width:100%; display:flex; justify-content:center; overflow:visible; margin-top:6px; }
     #calendar-scale-wrapper > #calendar{ max-width:var(--calendar-design-width); }
 
     /* Month card — larger text + bold border */
@@ -75,7 +75,7 @@
     .off-day{    background:var(--off-color); color:var(--text-main); }
     .today{      outline:3px solid #e74c3c; outline-offset:-3px; }
     .empty{ visibility:hidden; }
-    input[type=color]{ padding:0; height:40px; cursor:pointer; }
+    input[type=color]{ padding:0; height:38px; cursor:pointer; }
 
     /* === DISTINCT STYLE SIGNATURES === */
 
@@ -100,44 +100,17 @@
       overflow: hidden;
     }
     .theme-aurora h3 {
-      color: #fff;
-      text-transform: uppercase; letter-spacing:.12em; font-weight:900;
+      color: #fff; text-transform: uppercase; letter-spacing:.12em; font-weight:900;
       margin:-18px -18px 14px -18px; padding:16px 14px;
       background: linear-gradient(135deg, var(--on-color), var(--travel-color));
-      border:none; font-size:1.25rem;
-      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+      border:none; font-size:1.25rem; text-shadow: 0 1px 0 rgba(0,0,0,.25);
     }
-    .theme-aurora .weekday-header {
-      background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,0));
-      color:#2c3e50; font-weight:900; letter-spacing:.04em;
-      border: 1px solid rgba(0,0,0,.12); border-left:none; border-right:none;
-    }
-    .theme-aurora .day {
-      border-radius: 10px;
-      background: #f9fbff;
-      position: relative; overflow: hidden;
-    }
-    .theme-aurora .day::after {
-      content: ""; position:absolute; inset:0; pointer-events:none;
-      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 6px, rgba(255,255,255,0) 6px 12px);
-      mix-blend-mode: overlay;
-    }
+    .theme-aurora .weekday-header { background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,0)); color:#2c3e50; font-weight:900; letter-spacing:.04em; border: 1px solid rgba(0,0,0,.12); border-left:none; border-right:none; }
+    .theme-aurora .day { border-radius: 10px; background: #f9fbff; position: relative; overflow: hidden; }
+    .theme-aurora .day::after { content: ""; position:absolute; inset:0; pointer-events:none; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 6px, rgba(255,255,255,0) 6px 12px); mix-blend-mode: overlay; }
     .theme-aurora .off-day { background:#f3f6fb; color:#213042; }
-    .theme-aurora .on-shift {
-      background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color));
-      color:#fff; border-color: var(--on-color); text-shadow: 0 1px 0 rgba(0,0,0,.25);
-    }
-    .theme-aurora .travel-day {
-      background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color));
-      color:#fff; border-color: var(--travel-color); text-shadow: 0 1px 0 rgba(0,0,0,.25);
-    }
-
-    /* ---------- POSTER BOARD ---------- */
-    .theme-poster .month { border:2px solid var(--border-strong); border-radius:14px; background:linear-gradient(145deg, rgba(52,152,219,.06), rgba(230,126,34,.06)); box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden; }
-    .theme-poster h3 { text-transform:uppercase; letter-spacing:.08em; font-weight:900; color:#fff; margin:-18px -18px 14px -18px; padding:16px 12px; background:linear-gradient(135deg, var(--on-color), var(--travel-color)); border:none; font-size:1.3rem; }
-    .theme-poster .weekday-header { color:#444; font-weight:900; }
-    .theme-poster .day { border-radius:2px; background:rgba(255,255,255,0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 1px .5px rgba(0,0,0,.05); }
-    .theme-poster .off-day { background:rgba(255,255,255,0.65); }
+    .theme-aurora .on-shift { background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color)); color:#fff; border-color: var(--on-color); text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+    .theme-aurora .travel-day { background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color)); color:#fff; border-color: var(--travel-color); text-shadow: 0 1px 0 rgba(0,0,0,.25); }
 
     /* ---------- CLEAN GRID (Black borders; tints via variables) ---------- */
     .theme-clean-grid .month { border:2px solid #000; box-shadow:none; background:#fff; }
@@ -172,49 +145,36 @@
       .name-chip .value{ font-weight:800!important; font-size:1.1rem!important; }
     }
 
-    @media (max-width:700px){ .header-container{ grid-template-columns:1fr; justify-items:center; text-align:center; gap:10px; } #pageTitle{ justify-self:center; } .legend{ justify-self:center; } }
-    
-/* --- Mobile controls accordion --- */
-.controls-toggle {
-  display: none;
-  margin: 8px 0 10px;
-  padding: 10px 12px;
-  font-weight: 800;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--text-main);
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
-}
-@media (max-width: 700px){
-  .controls-toggle { display: inline-block; }
-  /* Start collapsed on phones */
-  .controls.is-collapsed {
-    display: none !important;
-  }
-  /* When opened, keep things tight */
-  .controls {
-    margin-top: 6px;
-    padding: 10px;
-    gap: 8px;
-    row-gap: 8px;
-    grid-template-columns: 1fr;     /* single, narrow column */
-  }
-  .controls label { font-size: .8em; }
-  .controls input, .controls select { width: 100%; max-width: 100%; }
-  .controls .btn { width: 100%; }
-}
+    /* Mobile compact tweaks */
+    @media (min-width:780px){ .controls .btn{ width:auto; } .controls{ grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); } }
+    @media (max-width:450px){ input,select{ width:150px; } input[type=range]{ width:160px; } .btn{ padding:9px 12px; } }
 
+    /* --- Mini sticky toolbar --- */
+    .mini-toolbar{ position:sticky; top:6px; z-index:5; display:none; gap:8px; padding:6px; margin:6px 0 8px; background:rgba(255,255,255,.9); backdrop-filter: blur(4px); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .mini-btn{ padding:8px 10px; font-weight:800; border:none; border-radius:6px; background:#e9ecef; color:#222; }
+    .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; }
+    .mini-btn:nth-child(2){ background:#2d6cdf; color:#fff; }
+    .mini-btn:nth-child(3){ background:#3498db; color:#fff; }
+    @media (max-width:700px){ .mini-toolbar{ display:flex; } }
+
+    /* --- Mobile controls accordion --- */
+    .controls-toggle { display:none; margin:8px 0 10px; padding:10px 12px; font-weight:800; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-main); box-shadow:0 2px 6px rgba(0,0,0,.06); }
+    @media (max-width:700px){
+      .controls-toggle { display:inline-block; }
+      .controls.is-collapsed { display:none !important; }
+      .controls { margin-top:6px; padding:10px; gap:8px; row-gap:8px; grid-template-columns:1fr; }
+      .controls label { font-size:.8em; }
+      .controls input, .controls select { width:100%; max-width:100%; }
+      .controls .btn { width:100%; }
+      .header-container { margin-bottom:6px; }
+    }
   </style>
-  <link rel="stylesheet" href="controls-compact.css">
 </head>
 <body>
   <div id="calendar-capture-root">
     <div class="header-container">
       <h2 id="pageTitle">North Slope Shift Calendar</h2>
-      <div id="nameInlineWrap">
-        <div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div>
-      </div>
+      <div id="nameInlineWrap"><div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div></div>
       <div class="legend">
         <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
         <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
@@ -222,9 +182,15 @@
       </div>
     </div>
 
-<button type="button" id="controlsToggle" class="controls-toggle" aria-expanded="false">
-  Show Controls
-</button>
+    <!-- Quick actions toolbar (mobile) -->
+    <div class="mini-toolbar" role="toolbar" aria-label="Quick actions">
+      <button type="button" class="mini-btn" onclick="generateCalendar()">Update</button>
+      <button type="button" class="mini-btn" onclick="downloadCalendarPDF()">PDF</button>
+      <button type="button" class="mini-btn" onclick="downloadCalendar()">Image</button>
+    </div>
+
+    <!-- Mobile accordion toggle -->
+    <button type="button" id="controlsToggle" class="controls-toggle" aria-expanded="false">Show Controls</button>
 
     <div class="controls">
       <div class="control-group"><label for="yearSelect">Year</label><input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()"></div>
@@ -232,7 +198,7 @@
       <div class="control-group"><label for="daysOff">Days OFF</label><input type="number" id="daysOff" min="1" step="1" value="21"></div>
       <div class="control-group"><label for="startDate">1st Day ON</label><input type="date" id="startDate" value="2026-01-08"></div>
       <div class="control-group"><label for="layoutStyle">Style</label>
-        <!-- Reversed order (exact opposite) -->
+        <!-- Reversed order -->
         <select id="layoutStyle" onchange="generateCalendar()">
           <option value="layout-wall theme-wall">Wall Calendar</option>
           <option value="layout-grid theme-clean-grid">Clean Grid</option>
@@ -264,7 +230,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name', tint:'sc_tint' };
+    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name', tint:'sc_tint', controls:'sc_controls_collapsed' };
 
     function saveSettings(){ try{
       localStorage.setItem(LS_KEYS.year, yearSelect.value);
@@ -315,7 +281,7 @@
 
     function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
       yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08';
-      layoutStyle.value='layout-wall theme-wall'; // default to first in reversed list
+      layoutStyle.value='layout-wall theme-wall';
       workColor.value='#3498db'; travelColor.value='#e67e22'; tintStrength.value='16'; captureWidth.value='2000'; nameField.value=''; document.body.classList.remove('dark-mode');
       updateColors(); updateNameInline(); generateCalendar(); applyAutoScale(); saveSettings(); }
 
@@ -337,12 +303,46 @@
 
     async function downloadCalendarPDF(){ const { jsPDF } = window.jspdf || {}; if(!jsPDF){ alert('PDF library is still loading. Please try again in a moment.'); return; } const year=getSelectedYear(); const bg='#ffffff'; const { cloneRoot, CAPTURE_WIDTH }=buildCloneForCapture(); const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host); try{ const canvas=await window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,width:CAPTURE_WIDTH,windowWidth:CAPTURE_WIDTH,scrollX:0,scrollY:0 }); const imgData=canvas.toDataURL('image/jpeg',0.95); const pxToPt=px=>(px/96)*72; const pageW=612, pageH=792, MARGIN=24; const maxW=pageW-2*MARGIN, maxH=pageH-2*MARGIN; const imgWpt=pxToPt(canvas.width), imgHpt=pxToPt(canvas.height); const scale=Math.min(maxW/imgWpt, maxH/imgHpt); const drawW=imgWpt*scale, drawH=imgHpt*scale; const offX=(pageW-drawW)/2, offY=(pageH-drawH)/2; const pdf=new jsPDF({ orientation:'p', unit:'pt', format:'letter' }); pdf.addImage(imgData,'JPEG',offX,offY,drawW,drawH); pdf.save(`Shift-Calendar-${year}.pdf`);}catch(err){ console.error('PDF generation failed:',err); alert('Sorry, generating the PDF failed. See the console for details.'); } finally { document.body.removeChild(host); } }
 
+    // Controls accordion helpers
+    function setControlsCollapsed(collapsed) {
+      const controls = document.querySelector('.controls');
+      const toggle   = document.getElementById('controlsToggle');
+      if (!controls || !toggle) return;
+      if (collapsed) {
+        controls.classList.add('is-collapsed');
+        toggle.setAttribute('aria-expanded','false');
+        toggle.textContent = 'Show Controls';
+        try { localStorage.setItem(LS_KEYS.controls, '1'); } catch(e){}
+      } else {
+        controls.classList.remove('is-collapsed');
+        toggle.setAttribute('aria-expanded','true');
+        toggle.textContent = 'Hide Controls';
+        try { localStorage.setItem(LS_KEYS.controls, '0'); } catch(e){}
+      }
+    }
+
     // Init references
     document.title='North Slope Shift Calendar';
     const yearSelect=document.getElementById('yearSelect'); const daysOn=document.getElementById('daysOn'); const daysOff=document.getElementById('daysOff'); const startDate=document.getElementById('startDate'); const layoutStyle=document.getElementById('layoutStyle'); const workColor=document.getElementById('workColor'); const travelColor=document.getElementById('travelColor'); const tintStrength=document.getElementById('tintStrength'); const nameField=document.getElementById('nameField'); const captureWidth=document.getElementById('captureWidth'); const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper'); const calendar=document.getElementById('calendar'); const nameInline=document.getElementById('nameInline'); const nameInlineText=document.getElementById('nameInlineText');
 
     loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
 
+    // Init accordion state
+    (function(){
+      const toggle = document.getElementById('controlsToggle');
+      const stored = localStorage.getItem(LS_KEYS.controls);
+      const preferCollapsed = (stored !== null) ? (stored==='1') : window.matchMedia('(max-width: 700px)').matches;
+      setControlsCollapsed(preferCollapsed);
+      if (toggle) toggle.addEventListener('click', ()=>{
+        const collapsed = document.querySelector('.controls')?.classList.contains('is-collapsed');
+        setControlsCollapsed(!collapsed);
+      });
+    })();
+
+    // Auto-collapse after Update on phones
+    (function(){ const updateBtn=document.querySelector('.btn.btn-gen'); if(updateBtn){ updateBtn.addEventListener('click', ()=>{ if(window.matchMedia('(max-width:700px)').matches) setControlsCollapsed(true); }); } })();
+
+    // Event wiring for settings
     layoutStyle.addEventListener('change', saveSettings); daysOn.addEventListener('input', saveSettings); daysOff.addEventListener('input', saveSettings); startDate.addEventListener('input', saveSettings); workColor.addEventListener('input', saveSettings); travelColor.addEventListener('input', saveSettings); tintStrength.addEventListener('input', saveSettings); nameField.addEventListener('input', saveSettings);
   </script>
 </body>
