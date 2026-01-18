@@ -5,24 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
 
-  <!-- Icons / PWA (optional) -->
+  <!-- Icons / Manifest (optional but recommended) -->
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
   <link rel="manifest" href="manifest.json">
 
   <style>
   :root{
-    --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
-    --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff;
-    --border-color:#eee; --border-strong:#000;
+    --on-color:#3498db;
+    --travel-color:#e67e22;
+    --off-color:#ffffff;
+
+    --text-main:#333;
+    --bg-body:#f0f2f5;
+    --bg-card:#ffffff;
+
+    --border-color:#eee;
+    --border-strong:#000;
+
+    /* Base tint variables; JS updates these from the slider */
     --on-tint-soft: rgba(52,152,219,0.12);
     --travel-tint-soft: rgba(230,126,34,0.14);
     --on-tint-strong: rgba(52,152,219,0.16);
     --travel-tint-strong: rgba(230,126,34,0.18);
+
+    /* Added for Standard & Aurora themes */
+    --on-solid-rgba: rgba(52,152,219,0.75);
+    --travel-solid-rgba: rgba(230,126,34,0.75);
+    --on-aurora-rgba: rgba(52,152,219,0.85);
+    --travel-aurora-rgba: rgba(230,126,34,0.85);
   }
   body.dark-mode{
-    --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a;
-    --bg-card:#2d2d2d; --border-color:#444; --border-strong:#e6e6e6;
+    --off-color:#2c3e50;
+    --text-main:#ecf0f1;
+    --bg-body:#1a1a1a;
+    --bg-card:#2d2d2d;
+    --border-color:#444;
+    --border-strong:#e6e6e6;
   }
   body{
     font-family:'Segoe UI',system-ui,sans-serif; padding:20px;
@@ -69,7 +88,8 @@
   }
   input[type=range]{ width:180px; }
   .btn{ padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; font-size:.95rem; }
-  .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; }
+  .btn-gen{ background:#2ecc71; color:#fff; }
+  .btn-dark{ background:#34495e; color:#fff; }
 
   /* Calendar layouts */
   .calendar-grid{ display:grid; gap:22px; --month-min:340px; }
@@ -96,22 +116,32 @@
     aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px;
     font-size:1.05em; border:2px solid var(--border-strong); font-weight:700;
   }
-  .on-shift{ background:var(--on-color)!important; color:#fff; }
-  .travel-day{ background:var(--travel-color)!important; color:#fff; }
+  .on-shift{ color:#fff; }
+  .travel-day{ color:#fff; }
   .off-day{ background:var(--off-color); color:var(--text-main); }
   .today{ outline:3px solid #e74c3c; outline-offset:-3px; }
   .empty{ visibility:hidden; }
   input[type=color]{ padding:0; height:38px; cursor:pointer; }
 
   /* THEMES */
+
+  /* --- Standard (Classic Cards) --- */
   .theme-standard .month { border:2px solid var(--border-strong); box-shadow:0 3px 10px rgba(0,0,0,.08); }
   .theme-standard h3 { color: var(--on-color); }
   .theme-standard .weekday-header { color:#5b6b7c; }
   .theme-standard .day { border-radius:999px; background:#f6f9ff; }
   .theme-standard .off-day { background:#f2f6fb; color:#222; }
-  .theme-standard .on-shift { background:var(--on-color)!important; color:#fff; border-color:var(--on-color); }
-  .theme-standard .travel-day { background:var(--travel-color)!important; color:#fff; border-color:var(--travel-color); }
+  /* Tint-controlled fills (uses --on-solid-rgba / --travel-solid-rgba) */
+  .theme-standard .on-shift {
+    background: linear-gradient(135deg, var(--on-solid-rgba), var(--on-color)) !important;
+    color:#fff; border-color:var(--on-color);
+  }
+  .theme-standard .travel-day {
+    background: linear-gradient(135deg, var(--travel-solid-rgba), var(--travel-color)) !important;
+    color:#fff; border-color:var(--travel-color);
+  }
 
+  /* --- Aurora --- */
   .theme-aurora .month{
     border:2px solid var(--border-strong); border-radius:16px;
     background: radial-gradient(1200px 600px at -10% -20%, rgba(52,152,219,.12), transparent 60%),
@@ -137,13 +167,17 @@
     mix-blend-mode: overlay;
   }
   .theme-aurora .off-day{ background:#f3f6fb; color:#213042; }
+  /* Tint-controlled aurora gradient first stop (uses --on-aurora-rgba / --travel-aurora-rgba) */
   .theme-aurora .on-shift{
-    background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color)); color:#fff; border-color: var(--on-color); text-shadow:0 1px 0 rgba(0,0,0,.25);
+    background: linear-gradient(135deg, var(--on-aurora-rgba), var(--on-color));
+    color:#fff; border-color: var(--on-color); text-shadow:0 1px 0 rgba(0,0,0,.25);
   }
   .theme-aurora .travel-day{
-    background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color)); color:#fff; border-color: var(--travel-color); text-shadow:0 1px 0 rgba(0,0,0,.25);
+    background: linear-gradient(135deg, var(--travel-aurora-rgba), var(--travel-color));
+    color:#fff; border-color: var(--travel-color); text-shadow:0 1px 0 rgba(0,0,0,.25);
   }
 
+  /* --- Clean Grid --- */
   .theme-clean-grid .month { border:2px solid #000; box-shadow:none; background:#fff; }
   .theme-clean-grid h3 { color:#111; background:#f1f3f5; border:none; padding:12px; border-radius:6px; }
   .theme-clean-grid .weekday-header { background:#f6f7f8; color:#333; border:1px solid #000; border-left:none; border-right:none; }
@@ -151,6 +185,7 @@
   .theme-clean-grid .on-shift { background: var(--on-tint-soft) !important; color:#0b3e69; border-color:#000 !important; }
   .theme-clean-grid .travel-day { background: var(--travel-tint-soft) !important; color:#6a350a; border-color:#000 !important; }
 
+  /* --- Wall --- */
   .theme-wall .month { border:2px solid #000; border-radius:10px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.06); }
   .theme-wall h3 { text-transform:uppercase; letter-spacing:.05em; color:#fff; margin:-18px -18px 12px -18px; padding:14px 12px; background:var(--on-color); border:none; }
   .theme-wall .weekday-header { color:#222; font-weight:900; letter-spacing:.02em; }
@@ -159,9 +194,13 @@
   .theme-wall .on-shift { background: var(--on-tint-strong) !important; color:#0b3e69; border-color:#000 !important; }
   .theme-wall .travel-day { background: var(--travel-tint-strong) !important; color:#6a350a; border-color:#000 !important; }
 
+  /* --- Poster --- */
   .theme-poster .month { border:3px solid #111; border-radius:4px; background:#fff; box-shadow:none; }
   .theme-poster h3 { color:#111; text-transform:uppercase; letter-spacing:.08em; border:none; padding:6px 0 10px; }
   .theme-poster .day { border-radius:6px; }
+  /* Tint-controlled fills (use the stronger tints for punch) */
+  .theme-poster .on-shift { background: var(--on-tint-strong) !important; color:#111; border-color:#111 !important; }
+  .theme-poster .travel-day { background: var(--travel-tint-strong) !important; color:#111; border-color:#111 !important; }
 
   /* ---- Letter image export (PNG): fill 8.5"x11" content area, readable ---- */
   .png-letter #pageTitle { font-size: 1.3rem !important; }
@@ -199,7 +238,11 @@
   <div id="calendar-capture-root">
     <div class="header-container">
       <h2 id="pageTitle">North Slope Shift Calendar</h2>
-      <div id="nameInlineWrap"><div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div></div>
+      <div id="nameInlineWrap">
+        <div id="nameInline" class="name-chip">
+          <span class="label">Name:</span><span class="value" id="nameInlineText"></span>
+        </div>
+      </div>
       <div class="legend">
         <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
         <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
@@ -234,14 +277,14 @@
       <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors(); saveSettings()" aria-label="Travel color"></div>
       <div class="control-group"><label for="tintStrength">Tint strength</label>
         <input type="range" id="tintStrength" min="8" max="30" step="1" value="16" oninput="updateColors(); saveSettings();">
-        <small style="opacity:.7">Adjusts fill intensity for Clean Grid & Wall Calendar</small>
       </div>
+
       <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Turd Ferguson" oninput="handleNameInput(); saveSettings()" maxlength="80"></div>
 
       <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
       <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
 
-      <!-- Image button (now: Letter-sized high-res PNG) -->
+      <!-- Image button (Letter-sized high-res PNG) -->
       <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendarImage()">Download Image</button>
 
       <!-- Hidden input kept for backward compatibility (ignored by image export) -->
@@ -256,304 +299,3 @@
   </div>
 
   <!-- Library needed for Image export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <script>
-  const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', name:'sc_name', tint:'sc_tint', capture:'sc_capture', controls:'sc_controls_collapsed' };
-
-  function saveSettings(){
-    try{
-      localStorage.setItem(LS_KEYS.year, yearSelect.value);
-      localStorage.setItem(LS_KEYS.on, daysOn.value);
-      localStorage.setItem(LS_KEYS.off, daysOff.value);
-      localStorage.setItem(LS_KEYS.start, startDate.value);
-      localStorage.setItem(LS_KEYS.style, layoutStyle.value);
-      localStorage.setItem(LS_KEYS.work, workColor.value);
-      localStorage.setItem(LS_KEYS.travel, travelColor.value);
-      localStorage.setItem(LS_KEYS.tint, tintStrength.value);
-      if(captureWidth) localStorage.setItem(LS_KEYS.capture, captureWidth.value);
-      localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0');
-      if(nameField) localStorage.setItem(LS_KEYS.name, nameField.value.trim());
-    }catch(e){}
-  }
-  function loadSettings(){
-    try{
-      const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; };
-      setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off);
-      setIf(startDate,LS_KEYS.start); setIf(layoutStyle,LS_KEYS.style);
-      setIf(workColor,LS_KEYS.work);  setIf(travelColor,LS_KEYS.travel);
-      setIf(nameField,LS_KEYS.name);  setIf(tintStrength,LS_KEYS.tint);
-      const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap;
-      if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
-    }catch(e){}
-  }
-
-  function __hexToRGBA(hex, alpha) {
-    try {
-      const h=(hex ?? '#000').replace('#',''); const n=parseInt(h,16);
-      const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    } catch(e){ return `rgba(0,0,0,${alpha ?? 1})`; }
-  }
-  function updateColors(){
-    const onHex=workColor?.value ?? '#3498db';
-    const trHex=travelColor?.value ?? '#e67e22';
-    const basePct=parseInt(tintStrength?.value ?? '16',10);
-    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-    const softOnPct=clamp(basePct-4,5,40);
-    const softTrPct=clamp(basePct-2,5,40);
-    const strongOnPct=clamp(basePct,5,40);
-    const strongTrPct=clamp(basePct+2,5,40);
-    document.documentElement.style.setProperty('--on-color',onHex);
-    document.documentElement.style.setProperty('--travel-color',trHex);
-    document.documentElement.style.setProperty('--on-tint-soft', __hexToRGBA(onHex, softOnPct/100));
-    document.documentElement.style.setProperty('--travel-tint-soft', __hexToRGBA(trHex, softTrPct/100));
-    document.documentElement.style.setProperty('--on-tint-strong', __hexToRGBA(onHex, strongOnPct/100));
-    document.documentElement.style.setProperty('--travel-tint-strong', __hexToRGBA(trHex, strongTrPct/100));
-  }
-
-  function handleNameInput(){ updateNameInline(); saveSettings(); }
-  function updateNameInline(){
-    const val=(nameField.value ?? '').trim();
-    const wrap=nameInline; const text=nameInlineText;
-    if(val){ text.textContent=val; wrap.style.display='inline-flex'; }
-    else   { text.textContent='';  wrap.style.display='none'; }
-  }
-
-  function resetSettings(){
-    if(!confirm('Reset all settings to defaults?')) return;
-    try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
-    yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08';
-    layoutStyle.value='layout-wall theme-wall'; workColor.value='#3498db'; travelColor.value='#e67e22';
-    tintStrength.value='16'; captureWidth.value='2200'; nameField.value='';
-    document.body.classList.remove('dark-mode');
-    updateColors(); updateNameInline(); generateCalendar();
-  }
-
-  let currentScale=1;
-  function applyAutoScale(){
-    const w=calendarScaleWrapper, c=calendar; if(!w || !c) return;
-    const DESIGN_WIDTH=1600;
-    const ww=w.clientWidth ?? window.innerWidth;
-    const s=Math.min(1, ww/ DESIGN_WIDTH);
-    if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; }
-  }
-  function initAutoScale(){
-    applyAutoScale();
-    if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper); }
-    else { window.addEventListener('resize',applyAutoScale); }
-  }
-
-  function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
-  function getSelectedYear(){ const y=parseInt(yearSelect.value,10); return Number.isFinite(y)?y:(new Date()).getFullYear(); }
-  function handleYearChange(){ generateCalendar(); saveSettings(); }
-
-  function generateCalendar(){
-    const dOn=parseInt(daysOn.value,10) ?? 21;
-    const dOff=parseInt(daysOff.value,10) ?? 21;
-    const startInput=startDate.value ?? '2026-01-08';
-    const year=getSelectedYear();
-    const layoutClasses=layoutStyle.value;
-    const startShift=new Date(startInput+'T00:00:00');
-    const today=new Date(); today.setHours(0,0,0,0);
-
-    const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML='';
-    const cycle=dOn+dOff;
-
-    for(let m=0;m<12;m++){
-      const monthDiv=document.createElement('div'); monthDiv.className='month';
-      const first=new Date(year,m,1);
-      let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`;
-      html+=`<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
-      for(let i=0;i<first.getDay();i++) html+='<div class="day empty"></div>';
-
-      const date=new Date(year,m,1);
-      while(date.getMonth()===m){
-        const diff=Math.round((date.getTime()-startShift.getTime())/86400000);
-        let pos=diff%(cycle); if(pos<0) pos+=cycle;
-        const type=(pos===0 || pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day';
-        const isToday=(date.getTime()===today.getTime())?'today':'';
-        html+=`<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
-        date.setDate(date.getDate()+1);
-      }
-      monthDiv.innerHTML=html+'</div>';
-      container.appendChild(monthDiv);
-    }
-    saveSettings();
-    requestAnimationFrame(applyAutoScale);
-  }
-
-  /* ---------- Letter-sized PNG export (8.5"x11" content area @300 DPI) ---------- */
-  function buildCloneForLetterPNG() {
-    const liveRoot = document.getElementById('calendar-capture-root');
-    const cloneRoot = liveRoot.cloneNode(true);
-
-    // Apply readable preset
-    cloneRoot.classList.add('png-letter');
-
-    // Remove UI chrome only; keep title, legend, and name chip
-    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle')
-      .forEach(el => el.remove());
-
-    // High-contrast name chip for print
-    const chip = cloneRoot.querySelector('.name-chip');
-    if (chip) {
-      chip.style.background = 'transparent';
-      chip.style.color = '#000';
-      chip.style.boxShadow = 'none';
-      chip.style.padding = '0';
-    }
-
-    // Remove autoscale transform; lay out naturally
-    const wrap = cloneRoot.querySelector('#calendar-scale-wrapper');
-    if (wrap) {
-      wrap.style.transform = 'none';
-      wrap.style.width = '100%';
-    }
-
-    // Ensure a 3×4 grid uses full width
-    const cal = cloneRoot.querySelector('#calendar');
-    if (cal) {
-      cal.style.display = 'grid';
-      cal.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      cal.style.gap = '10px';
-      cal.style.margin = '0 auto';
-      cal.style.width = '100%';
-      cal.style.maxWidth = '100%';
-    }
-    return { cloneRoot };
-  }
-
-  /**
-   * Download a Letter-sized PNG that fills the printable area.
-   * Keeps only: Title, Name chip (if present), Legend, 12-month calendar.
-   * Prints best with the same margins (default 0.25") and "Actual size" (100%).
-   *
-   * @param {number} marginIn  Margin in inches (default 0.25" on all sides)
-   * @param {number} dpi       Target DPI (default 300)
-   */
-  async function downloadCalendarImage(marginIn = 0.25, dpi = 300) {
-    const year = getSelectedYear();
-    const CSS_PPI = 96;            // CSS pixels per inch (browser)
-    const PAGE_IN_W = 8.5, PAGE_IN_H = 11;
-
-    // Compute the content box (inside margins) in CSS pixels
-    const contentCssW = Math.round((PAGE_IN_W - 2 * marginIn) * CSS_PPI);
-    const contentCssH = Math.round((PAGE_IN_H - 2 * marginIn) * CSS_PPI);
-
-    // Prepare a print-friendly clone
-    const { cloneRoot } = buildCloneForLetterPNG();
-
-    // Off-screen host sized exactly to the content box
-    const fitBox = document.createElement('div');
-    fitBox.style.position = 'fixed';
-    fitBox.style.left = '-99999px';
-    fitBox.style.top = '0';
-    fitBox.style.background = '#fff';
-    fitBox.style.width = contentCssW + 'px';
-    fitBox.style.height = contentCssH + 'px';
-    fitBox.style.overflow = 'hidden';
-
-    const inner = document.createElement('div');
-    inner.style.transformOrigin = 'top left';
-    inner.appendChild(cloneRoot);
-    fitBox.appendChild(inner);
-    document.body.appendChild(fitBox);
-
-    // Lay out the clone at the target width
-    cloneRoot.style.width = contentCssW + 'px';
-    cloneRoot.style.maxWidth = contentCssW + 'px';
-
-    // Wait a frame for layout
-    await new Promise(r => requestAnimationFrame(r));
-
-    // Scale to fill height (width already fits)
-    const naturalH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
-    const scale = contentCssH / naturalH;
-    inner.style.transform = `scale(${scale})`;
-
-    // Render at DPI (e.g., 300) — multiplies CSS px to raster px for print crispness
-    const canvas = await html2canvas(fitBox, {
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      width: contentCssW,
-      height: contentCssH,
-      windowWidth: contentCssW,
-      windowHeight: contentCssH,
-      scrollX: 0,
-      scrollY: 0,
-      scale: dpi / CSS_PPI
-    });
-
-    // Create a downloadable PNG
-    const link = document.createElement('a');
-    link.download = `Shift-Calendar-${year}-Letter.png`;
-    link.href = canvas.toDataURL('image/png');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    // Cleanup
-    document.body.removeChild(fitBox);
-  }
-
-  /* ---------- Mobile controls accordion ---------- */
-  function setControlsCollapsed(collapsed){
-    const controls=document.querySelector('.controls');
-    const toggle=document.getElementById('controlsToggle');
-    if(!controls || !toggle) return;
-    if(collapsed){
-      controls.classList.add('is-collapsed');
-      toggle.setAttribute('aria-expanded','false'); toggle.textContent='Show Controls';
-      try{ localStorage.setItem(LS_KEYS.controls,'1'); }catch(e){}
-    } else {
-      controls.classList.remove('is-collapsed');
-      toggle.setAttribute('aria-expanded','true'); toggle.textContent='Hide Controls';
-      try{ localStorage.setItem(LS_KEYS.controls,'0'); }catch(e){}
-    }
-  }
-
-  /* ---------- Init ---------- */
-  document.title='North Slope Shift Calendar';
-  const yearSelect=document.getElementById('yearSelect');
-  const daysOn=document.getElementById('daysOn');
-  const daysOff=document.getElementById('daysOff');
-  const startDate=document.getElementById('startDate');
-  const layoutStyle=document.getElementById('layoutStyle');
-  const workColor=document.getElementById('workColor');
-  const travelColor=document.getElementById('travelColor');
-  const tintStrength=document.getElementById('tintStrength');
-  const nameField=document.getElementById('nameField');
-  const captureWidth=document.getElementById('captureWidth');
-  const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper');
-  const calendar=document.getElementById('calendar');
-  const nameInline=document.getElementById('nameInline');
-  const nameInlineText=document.getElementById('nameInlineText');
-
-  loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
-
-  // Setup controls toggle state
-  (function(){
-    const toggle=document.getElementById('controlsToggle');
-    const stored=localStorage.getItem(LS_KEYS.controls);
-    const preferCollapsed=(stored!==null)?(stored==='1'):window.matchMedia('(max-width:700px)').matches;
-    setControlsCollapsed(preferCollapsed);
-    if(toggle){
-      toggle.addEventListener('click', ()=>{
-        const collapsed=document.querySelector('.controls')?.classList.contains('is-collapsed');
-        setControlsCollapsed(!collapsed);
-      });
-    }
-  })();
-
-  // Auto-collapse after Update on phones
-  (function(){
-    const updateBtn=document.querySelector('.btn.btn-gen');
-    if(updateBtn){
-      updateBtn.addEventListener('click', ()=>{
-        if(window.matchMedia('(max-width:700px)').matches) setControlsCollapsed(true);
-      });
-    }
-  })();
-  </script>
-</body>
-</html>
