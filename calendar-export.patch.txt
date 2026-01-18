@@ -1,0 +1,214 @@
+
+*** a/index.html
+--- b/index.html
+@@
+   <link rel="manifest" href="manifest.json">
+   <style>
+@@
+   .pdf-mode .day{ border-width:1px!important; }
++
++  /* ---- PDF: fill letter page and stay readable ---- */
++  .pdf-fill #pageTitle {
++    font-size: 1.3rem !important;
++  }
++  .pdf-fill .legend {
++    padding: 8px 10px !important;
++    gap: 10px !important;
++    font-size: 0.95rem !important;
++nt;
++  }
++  .pdf-fill .calendar-grid {
++    grid-template-columns: repeat(3, 1fr) !important;
++    gap: 10px !important;
++    --month-min: 0 !important;
++  }
++  .pdf-fill .month { padding: 12px !important; }
++  .pdf-fill h3 {
++    padding-bottom: 8px !important;
++    font-size: 1.1rem !important;
++    border-width: 1px !important;
++  }
++  .pdf-fill .weekday-header { margin-bottom: 8px !important; }
+@@
+   <!-- Mobile quick actions -->
+   <div class="mini-toolbar" role="toolbar" aria-label="Quick actions">
+     <button type="button" class="mini-btn" onclick="generateCalendar()">Update</button>
+-    <button type="button" class="mini-btn" onclick="downloadCalendarPDF()">PDF</button>
+-    <button type="button" class="mini-btn" onclick="downloadCalendar()">Image</button>
++    <button type="button" class="mini-btn" onclick="downloadCalendarPDF()">PDF</button>
++    <button type="button" class="mini-btn" onclick="downloadCalendarImage()">Image</button>
+   </div>
+@@
+     <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
+-    <button type="button" class="btn" style="background:#2d6cdf;color:#fff;" onclick="downloadCalendarPDF()">Download PDF</button>
+-    <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendar()">Download Image</button>
++    <button type="button" class="btn" style="background:#2d6cdf;color:#fff;" onclick="downloadCalendarPDF()">Download PDF</button>
++    <button type="button" class="btn" style="background:#1f8b4c;color:#fff;" onclick="downloadCalendarPDFTwoPages()">PDF (2 pages, larger)</button>
++    <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendarImage()">Download Image</button>
+     <input type="hidden" id="captureWidth" value="2200">
+     <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
+   </div>
+@@
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   <script>
+@@ildCloneForCapture(){ const liveRoot=document.getElementById('calendar-capture-root'); const cloneRoot=liveRoot.cloneNode(true); cloneRoot.classList.add('pdf-mode'); cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove()); cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove()); const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; } const wrap=cloneRoot.querySelector('#calendar-scale-wrapper'); if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; } const cal=cloneRoot.querySelector('#calendar'); if(cal){ cal.style.display='grid'; cal.style.gridTemplateColumns='repeat(3, 1fr)'; cal.style.gap='8px'; cal.style.margin='0 auto'; cal.style.width='100%'; cal.style.maxWidth='100%'; } return { cloneRoot }; }
+-  async function downloadCalendar(){ const year=getSelectedYear(); const { cloneRoot }=buildCloneForCapture(); const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background='#ffffff'; host.appendChild(cloneRoot); document.body.appendChild(host); try{ const captureCssW=Math.max(800, parseInt(document.getElementById('captureWidth')?.value ?? '2200',10)); cloneRoot.style.width=captureCssW+'px'; cloneRoot.style.maxWidth=captureCssW+'px'; await new Promise(r=>requestAnimationFrame(r)); const fullH=Math.ceil(cloneRoot.scrollHeight ?? cloneRoot.getBoundingClientRect().height); const canvas=await html2canvas(cloneRoot,{ backgroundColor:'#ffffff', useCORS:true, width:captureCssW, height:fullH, windowWidth:captureCssW, windowHeight:fullH, scrollX:0, scrollY:0, scale:2.0 }); const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); link.remove(); }catch(err){ console.error('PNG export failed:',err); alert('Sorry, generating the image failed.'); } finally { document.body.removeChild(host); } }
+-  async function downloadCalendarPDF(){ const { jsPDF } = window.jspdf ?? {}; if(!jsPDF){ alert('PDF library is still loading.'); return; } const year=getSelectedYear(); const { cloneRoot }=buildCloneForCapture(); const CSS_PPI=96, TARGET_DPI=300; const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25; const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI), contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI); const fitBox=document.createElement('div'); fitBox.style.position='fixed'; fitBox.style.left='-99999px'; fitBox.style.top='0'; fitBox.style.background='#fff'; fitBox.style.width=contentCssW+'px'; fitBox.style.minHeight=contentCssH+'px'; fitBox.style.overflow='hidden'; const inner=document.createElement('div'); inner.style.transformOrigin='top left'; inner.appendChild(cloneRoot); fitBox.appendChild(inner); document.body.appendChild(fitBox); cloneRoot.style.width=contentCssW+'px'; cloneRoot.style.maxWidth=contentCssW+'px'; await new Promise(r=>requestAnimationFrame(r)); const naturalH=Math.ceil(fitBox.scrollHeight ?? fitBox.getBoundingClientRect().height); const scale=Math.min(1, contentCssH/naturalH); inner.style.transform=`scale(${scale})`; const finalH=Math.max(1, Math.floor(naturalH*scale)); const canvas=await html2canvas(fitBox,{ backgroundColor:'#ffffff', useCORS:true, width:contentCssW, height:finalH, windowWidth:contentCssW, windowHeight:finalH, scrollX:0, scrollY:0, scale: TARGET_DPI / CSS_PPI }); const pageW=612, pageH=792, MARGIN_PT=72*MARGIN_IN; const maxW=pageW-2*MARGIN_PT; const pxToPt=px=>(px/96)*72; const imgWpt=pxToPt(canvas.width), imgHpt=pxToPt(canvas.height); const drawW=maxW, drawH=imgHpt*(drawW/imgWpt); const offX=(pageW-drawW)/2, offY=(pageH-drawH)/2; const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false}); if(typeof pdf.setCompression==='function') pdf.setCompression(false); pdf.addImage(canvas.toDataURL('image/png'),'PNG', offX, offY, drawW, drawH); pdf.save(`Shift-Calendar-${year}.pdf`); document.body.removeChild(fitBox); }
++  /* ---------- New: WYSIWYG Image Export ---------- */
++  function _hideForCapture(elements){
++    const changed=[];
++    elements.forEach(el=>{ if(!el) return; changed.push([el, el.style.display]); el.style.display='none'; });
++    return ()=>changed.forEach(([el,prev])=>{ el.style.display = prev || ''; });
++  }
++  async function downloadCalendarImage(){
++    const year=getSelectedYear();
++    const root=document.getElementById('calendar-capture-root');
++    if(!root) return;
++    const restore=_hideForCapture([
++      root.querySelector('.controls'),
++      root.querySelector('.mini-toolbar'),
++      root.querySelector('.controls-toggle')
++    ]);
++    try{
++      const dpr=Math.min(3, window.devicePixelRatio || 1);
++      const bg=getComputedStyle(document.body).backgroundColor || '#ffffff';
++      const canvas=await html2canvas(root,{ backgroundColor:bg, useCORS:true, scale:dpr, logging:false });
++      const link=document.createElement('a');
++      link.download=`Shift-Calendar-${year}.png`;
++      link.href=canvas.toDataURL('image/png');
++      document.body.appendChild(link);
++      link.click();
++      link.remove();
++    }catch(err){
++      console.error('PNG export failed:',err);
++      alert('Sorry, generating the image failed.');
++    }finally{
++      restore();
++    }
++  }
++
++  /* ---------- New: PDF clone (readable + page-filling) ---------- */
++  function buildCloneForPDF(){
++    const liveRoot=document.getElementById('calendar-capture-root');
++    const cloneRoot=liveRoot.cloneNode(true);
++    cloneRoot.classList.add('pdf-fill');
++    // Remove UI chrome only; keep title, legend, and name chip
++    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
++    // High-contrast name chip
++    const chip=cloneRoot.querySelector('.name-chip');
++    if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
++    // Remove autoscale transform for natural layout
++    const wrap=cloneRoot.querySelector('#calendar-scale-wrapper');
++    if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; }
++    // Ensure 3×4 grid fills width
++    const cal=cloneRoot.querySelector('#calendar');
++    if(cal){ cal.style.display='grid'; cal.style.gridTemplateColumns='repeat(3, 1fr)'; cal.style.gap='10px'; cal.style.margin='0 auto'; cal.style.width='100%'; cal.style.maxWidth='100%'; }
++    return { cloneRoot };
++  }
++
++  /* ---------- New: Single-page Letter PDF (default) ---------- */
++  async function downloadCalendarPDF(){
++    const { jsPDF } = window.jspdf || {};
++    if(!jsPDF){ alert('PDF library is still loading.'); return; }
++    const year=getSelectedYear();
++    const CSS_PPI=96, TARGET_DPI=300;
++    const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;
++    const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI);
++    const contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI);
++    const { cloneRoot }=buildCloneForPDF();
++    const fitBox=document.createElement('div');
++    fitBox.style.position='fixed';
++    fitBox.style.left='-99999px';
++    fitBox.style.top='0';
++    fitBox.style.background='#fff';
++    fitBox.style.width=contentCssW+'px';
++    fitBox.style.height=contentCssH+'px';
++    fitBox.style.overflow='hidden';
++    const inner=document.createElement('div');
++    inner.style.transformOrigin='top left';
++    inner.appendChild(cloneRoot);
++    fitBox.appendChild(inner);
++    document.body.appendChild(fitBox);
++    cloneRoot.style.width=contentCssW+'px';
++    cloneRoot.style.maxWidth=contentCssW+'px';
++    await new Promise(r=>requestAnimationFrame(r));
++    const naturalH=Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
++    const scale=contentCssH / naturalH;
++    inner.style.transform=`scale(${scale})`;
++    const canvas=await html2canvas(fitBox,{
++      backgroundColor:'#ffffff',
++      useCORS:true,
++      width:contentCssW,
++      height:contentCssH,
++      windowWidth:contentCssW,
++      windowHeight:contentCssH,
++      scrollX:0, scrollY:0,
++      scale: TARGET_DPI / CSS_PPI
++    });
++    const pageW=612, pageH=792;
++    const marginPt=72*MARGIN_IN;
++    const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false});
++    if(typeof pdf.setCompression==='function') pdf.setCompression(false);
++    pdf.addImage(canvas.toDataURL('image/png'),'PNG', marginPt, marginPt, pageW-2*marginPt, pageH-2*marginPt);
++    pdf.save(`Shift-Calendar-${year}.pdf`);
++    document.body.removeChild(fitBox);
++  }
++
++  /* ---------- New: Two-page Letter PDF (larger text) ---------- */
++  async function downloadCalendarPDFTwoPages(){
++    const { jsPDF } = window.jspdf || {};
++    if(!jsPDF){ alert('PDF library is still loading.'); return; }
++    const year=getSelectedYear();
++    const CSS_PPI=96, TARGET_DPI=300;
++    const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;
++    const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI);
++    const contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI);
++    const { cloneRoot }=buildCloneForPDF();
++    const host=document.createElement('div');
++    host.style.position='fixed';
++    host.style.left='-99999px';
++    host.style.top='0';
++    host.style.background='#fff';
++    host.style.width=contentCssW+'px';
++    host.style.overflow='visible';
++    document.body.appendChild(host);
++    cloneRoot.style.width=contentCssW+'px';
++    cloneRoot.style.maxWidth=contentCssW+'px';
++    host.appendChild(cloneRoot);
++    await new Promise(r=>requestAnimationFrame(r));
++    const naturalH=Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
++    const fullCanvas=await html2canvas(host,{
++      backgroundColor:'#ffffff',
++      useCORS:true,
++      width:contentCssW,
++      height:naturalH,
++      windowWidth:contentCssW,
++      windowHeight:naturalH,
++      scrollX:0, scrollY:0,
++      scale: TARGET_DPI / CSS_PPI
++    });
++    document.body.removeChild(host);
++    const pagePxH=Math.round(contentCssH * (TARGET_DPI / CSS_PPI));
++    const totalPxH=fullCanvas.height;
++    const pageWpt=612, pageHpt=792;
++    const marginPt=72*MARGIN_IN;
++    const drawWpt=pageWpt-2*marginPt, drawHpt=pageHpt-2*marginPt;
++    const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false});
++    if(typeof pdf.setCompression==='function') pdf.setCompression(false);
++    let y=0, pageIndex=0;
++    while(y < totalPxH){
++      const sliceH=Math.min(pagePxH, totalPxH - y);
++      const pageCanvas=document.createElement('canvas');
++      pageCanvas.width=fullCanvas.width;
++      pageCanvas.height=sliceH;
++      const ctx=pageCanvas.getContext('2d');
++      ctx.drawImage(fullCanvas, 0, y, fullCanvas.width, sliceH, 0, 0, fullCanvas.width, sliceH);
++      if(pageIndex>0) pdf.addPage('letter','p');
++      pdf.addImage(pageCanvas.toDataURL('image/png'),'PNG', marginPt, marginPt, drawWpt, drawHpt);
++      y += sliceH;
++      pageIndex++;
++    }
++    pdf.save(`Shift-Calendar-${year}-2pg.pdf`);
++  }
+@@
+   loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
