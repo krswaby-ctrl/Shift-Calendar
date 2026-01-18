@@ -10,12 +10,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <style>
-    :root {
-      --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
-      --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee; --border-strong:#000;
-      --on-tint-soft: rgba(52,152,219,0.12); --travel-tint-soft: rgba(230,126,34,0.14);
-      --on-tint-strong: rgba(52,152,219,0.16); --travel-tint-strong: rgba(230,126,34,0.18);
-    }
+    :root { --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff; --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee; --border-strong:#000; --on-tint-soft: rgba(52,152,219,0.12); --travel-tint-soft: rgba(230,126,34,0.14); --on-tint-strong: rgba(52,152,219,0.16); --travel-tint-strong: rgba(230,126,34,0.18); }
     body.dark-mode { --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d; --border-color:#444; --border-strong:#e6e6e6; }
     body { font-family:'Segoe UI',system-ui,sans-serif; padding:20px; background:var(--bg-body); color:var(--text-main); margin:0; transition:background .3s,color .3s; }
 
@@ -63,7 +58,7 @@
     .empty{ visibility:hidden; }
     input[type=color]{ padding:0; height:38px; cursor:pointer; }
 
-    /* === THEMES (full) === */
+    /* THEMES */
     .theme-standard .month { border:2px solid var(--border-strong); box-shadow:0 3px 10px rgba(0,0,0,.08); }
     .theme-standard h3 { color: var(--on-color); }
     .theme-standard .weekday-header { color:#5b6b7c; }
@@ -96,12 +91,11 @@
     .theme-wall .on-shift { background: var(--on-tint-strong) !important; color:#0b3e69; border-color:#000 !important; }
     .theme-wall .travel-day { background: var(--travel-tint-strong) !important; color:#6a350a; border-color:#000 !important; }
 
-    /* Simple poster theme */
     .theme-poster .month { border:3px solid #111; border-radius:4px; background:#fff; box-shadow:none; }
     .theme-poster h3 { color:#111; text-transform:uppercase; letter-spacing:.08em; border:none; padding:6px 0 10px; }
     .theme-poster .day { border-radius:6px; }
 
-    /* === PDF-only compact overrides (scoped by .pdf-mode on clone only) === */
+    /* PDF-only compact overrides (clone only) */
     .pdf-mode #pageTitle{ font-size:1.25rem!important; }
     .pdf-mode .legend{ padding:6px 8px!important; gap:8px!important; font-size:.9rem!important; box-shadow:none!important; }
     .pdf-mode .calendar-grid{ grid-template-columns:repeat(3,1fr)!important; gap:8px!important; --month-min:240px!important; }
@@ -109,6 +103,25 @@
     .pdf-mode h3{ padding-bottom:6px!important; font-size:1.15rem!important; border-width:1px!important; }
     .pdf-mode .weekday-header{ margin-bottom:6px!important; }
     .pdf-mode .day{ border-width:1px!important; }
+
+    /* Mobile quick toolbar + Controls toggle */
+    .mini-toolbar{ position:sticky; top:6px; z-index:5; display:none; gap:8px; padding:6px; margin:6px 0 8px; background:rgba(255,255,255,.9); backdrop-filter: blur(4px); border:1px solid var(--border-color); border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .mini-btn{ padding:8px 10px; font-weight:800; border:none; border-radius:6px; background:#e9ecef; color:#222; }
+    .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; }
+    .mini-btn:nth-child(2){ background:#2d6cdf; color:#fff; }
+    .mini-btn:nth-child(3){ background:#3498db; color:#fff; }
+
+    .controls-toggle { display:none; margin:8px 0 10px; padding:10px 12px; font-weight:800; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-main); box-shadow:0 2px 6px rgba(0,0,0,.06); }
+
+    @media (max-width:700px){
+      .mini-toolbar{ display:flex; }
+      .controls-toggle{ display:inline-block; }
+      .controls.is-collapsed { display:none !important; }
+      .controls { margin-top:6px; padding:10px; gap:8px; row-gap:8px; grid-template-columns:1fr; }
+      .controls label { font-size:.8em; }
+      .controls input, .controls select { width:100%; max-width:100%; }
+      .controls .btn { width:100%; }
+    }
 
     @media print{ @page{ size:auto; margin:0.25in; } }
   </style>
@@ -124,6 +137,16 @@
         <div class="legend-item"><div class="dot" style="background:var(--off-color);"></div> Off</div>
       </div>
     </div>
+
+    <!-- Mobile quick actions -->
+    <div class="mini-toolbar" role="toolbar" aria-label="Quick actions">
+      <button type="button" class="mini-btn" onclick="generateCalendar()">Update</button>
+      <button type="button" class="mini-btn" onclick="downloadCalendarPDF()">PDF</button>
+      <button type="button" class="mini-btn" onclick="downloadCalendar()">Image</button>
+    </div>
+
+    <!-- Mobile controls toggle -->
+    <button type="button" id="controlsToggle" class="controls-toggle" aria-expanded="false">Show Controls</button>
 
     <div class="controls">
       <div class="control-group"><label for="yearSelect">Year</label><input type="number" id="yearSelect" min="1970" max="2100" value="2026" oninput="handleYearChange()"></div>
@@ -150,7 +173,7 @@
       <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
       <button type="button" class="btn" style="background:#2d6cdf;color:#fff;" onclick="downloadCalendarPDF()">Download PDF</button>
       <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendar()">Download Image</button>
-      <input type="hidden" id="captureWidth" value="2000">
+      <input type="hidden" id="captureWidth" value="2200">
       <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
     </div>
 
@@ -162,59 +185,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', capture:'sc_captureWidth', name:'sc_name', tint:'sc_tint' };
+    const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', name:'sc_name', tint:'sc_tint', capture:'sc_capture', controls:'sc_controls_collapsed' };
 
-    function saveSettings(){ try{
-      localStorage.setItem(LS_KEYS.year, yearSelect.value);
-      localStorage.setItem(LS_KEYS.on, daysOn.value);
-      localStorage.setItem(LS_KEYS.off, daysOff.value);
-      localStorage.setItem(LS_KEYS.start, startDate.value);
-      localStorage.setItem(LS_KEYS.style, layoutStyle.value);
-      localStorage.setItem(LS_KEYS.work, workColor.value);
-      localStorage.setItem(LS_KEYS.travel, travelColor.value);
-      localStorage.setItem(LS_KEYS.tint, tintStrength.value);
-      localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0');
-      if(nameField) localStorage.setItem(LS_KEYS.name, nameField.value.trim());
-    }catch(e){} }
-
-    function loadSettings(){ try{
-      const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; };
-      setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off); setIf(startDate,LS_KEYS.start);
-      setIf(layoutStyle,LS_KEYS.style); setIf(workColor,LS_KEYS.work); setIf(travelColor,LS_KEYS.travel); setIf(nameField,LS_KEYS.name); setIf(tintStrength,LS_KEYS.tint);
-      if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
-    }catch(e){} }
+    function saveSettings(){ try{ localStorage.setItem(LS_KEYS.year, yearSelect.value); localStorage.setItem(LS_KEYS.on, daysOn.value); localStorage.setItem(LS_KEYS.off, daysOff.value); localStorage.setItem(LS_KEYS.start, startDate.value); localStorage.setItem(LS_KEYS.style, layoutStyle.value); localStorage.setItem(LS_KEYS.work, workColor.value); localStorage.setItem(LS_KEYS.travel, travelColor.value); localStorage.setItem(LS_KEYS.tint, tintStrength.value); if(captureWidth) localStorage.setItem(LS_KEYS.capture, captureWidth.value); localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0'); if(nameField) localStorage.setItem(LS_KEYS.name, nameField.value.trim()); }catch(e){} }
+    function loadSettings(){ try{ const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; }; setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off); setIf(startDate,LS_KEYS.start); setIf(layoutStyle,LS_KEYS.style); setIf(workColor,LS_KEYS.work); setIf(travelColor,LS_KEYS.travel); setIf(nameField,LS_KEYS.name); setIf(tintStrength,LS_KEYS.tint); const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap; if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode'); }catch(e){} }
 
     function __hexToRGBA(hex, alpha) { try { const h=(hex||'#000').replace('#',''); const n=parseInt(h,16); const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`; } catch(e){ return `rgba(0,0,0,${alpha||1})`; } }
 
-    function updateColors(){
-      const onHex = workColor?.value || '#3498db';
-      const trHex = travelColor?.value || '#e67e22';
-      const basePct = parseInt(tintStrength?.value || '16', 10);
-      const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
-      const softOnPct = clamp(basePct - 4, 5, 40);
-      const softTrPct = clamp(basePct - 2, 5, 40);
-      const strongOnPct = clamp(basePct,     5, 40);
-      const strongTrPct = clamp(basePct + 2, 5, 40);
-
-      document.documentElement.style.setProperty('--on-color', onHex);
-      document.documentElement.style.setProperty('--travel-color', trHex);
-      document.documentElement.style.setProperty('--on-tint-soft', __hexToRGBA(onHex, softOnPct/100));
-      document.documentElement.style.setProperty('--travel-tint-soft', __hexToRGBA(trHex, softTrPct/100));
-      document.documentElement.style.setProperty('--on-tint-strong', __hexToRGBA(onHex, strongOnPct/100));
-      document.documentElement.style.setProperty('--travel-tint-strong', __hexToRGBA(trHex, strongTrPct/100));
-    }
+    function updateColors(){ const onHex=workColor?.value||'#3498db'; const trHex=travelColor?.value||'#e67e22'; const basePct=parseInt(tintStrength?.value||'16',10); const clamp=(v,min,max)=>Math.max(min,Math.min(max,v)); const softOnPct=clamp(basePct-4,5,40); const softTrPct=clamp(basePct-2,5,40); const strongOnPct=clamp(basePct,5,40); const strongTrPct=clamp(basePct+2,5,40); document.documentElement.style.setProperty('--on-color',onHex); document.documentElement.style.setProperty('--travel-color',trHex); document.documentElement.style.setProperty('--on-tint-soft', __hexToRGBA(onHex, softOnPct/100)); document.documentElement.style.setProperty('--travel-tint-soft', __hexToRGBA(trHex, softTrPct/100)); document.documentElement.style.setProperty('--on-tint-strong', __hexToRGBA(onHex, strongOnPct/100)); document.documentElement.style.setProperty('--travel-tint-strong', __hexToRGBA(trHex, strongTrPct/100)); }
 
     function handleNameInput(){ updateNameInline(); saveSettings(); }
     function updateNameInline(){ const val=(nameField.value||'').trim(); const wrap=nameInline; const text=nameInlineText; if(val){ text.textContent=val; wrap.style.display='inline-flex'; } else { text.textContent=''; wrap.style.display='none'; } }
 
-    function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
-      yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08';
-      layoutStyle.value='layout-wall theme-wall';
-      workColor.value='#3498db'; travelColor.value='#e67e22'; tintStrength.value='16'; nameField.value=''; document.body.classList.remove('dark-mode');
-      updateColors(); updateNameInline(); generateCalendar(); }
+    function resetSettings(){ if(!confirm('Reset all settings to defaults?')) return; try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){} yearSelect.value=new Date().getFullYear(); daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08'; layoutStyle.value='layout-wall theme-wall'; workColor.value='#3498db'; travelColor.value='#e67e22'; tintStrength.value='16'; captureWidth.value='2200'; nameField.value=''; document.body.classList.remove('dark-mode'); updateColors(); updateNameInline(); generateCalendar(); }
 
-    let currentScale=1;
-    function applyAutoScale(){ const w=calendarScaleWrapper, c=calendar; if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
+    let currentScale=1; function applyAutoScale(){ const w=calendarScaleWrapper, c=calendar; if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
     function initAutoScale(){ applyAutoScale(); if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper); } else { window.addEventListener('resize',applyAutoScale); } }
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
 
@@ -223,61 +208,26 @@
 
     function generateCalendar(){ const dOn=parseInt(daysOn.value,10)||21; const dOff=parseInt(daysOff.value,10)||21; const startInput=startDate.value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=layoutStyle.value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=dOn+dOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-    // Build a clone tailored for PDF only (does not touch the live DOM)
-    function buildCloneForCapture(){
-      const liveRoot=document.getElementById('calendar-capture-root');
-      const cloneRoot=liveRoot.cloneNode(true);
-      cloneRoot.classList.add('pdf-mode'); // scope compact rules only to the clone
-      cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove());
-      cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
-      const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
-      const wrap=cloneRoot.querySelector('#calendar-scale-wrapper'); if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; }
-      const cal=cloneRoot.querySelector('#calendar'); if(cal){ cal.style.display='grid'; cal.style.gridTemplateColumns='repeat(3, 1fr)'; cal.style.gap='8px'; cal.style.margin='0 auto'; cal.style.width='100%'; cal.style.maxWidth='100%'; }
-      return { cloneRoot };
-    }
+    function buildCloneForCapture(){ const liveRoot=document.getElementById('calendar-capture-root'); const cloneRoot=liveRoot.cloneNode(true); cloneRoot.classList.add('pdf-mode'); cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove()); cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove()); const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; } const wrap=cloneRoot.querySelector('#calendar-scale-wrapper'); if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; } const cal=cloneRoot.querySelector('#calendar'); if(cal){ cal.style.display='grid'; cal.style.gridTemplateColumns='repeat(3, 1fr)'; cal.style.gap='8px'; cal.style.margin='0 auto'; cal.style.width='100%'; cal.style.maxWidth='100%'; } return { cloneRoot }; }
 
-    // 300 dpi PDF: fit to Letter width; shrink vertically if needed; crisp PNG
-    async function downloadCalendarPDF(){
-      const { jsPDF } = window.jspdf || {};
-      if(!jsPDF){ alert('PDF library is still loading.'); return; }
-      const year=getSelectedYear();
-      const { cloneRoot }=buildCloneForCapture();
+    async function downloadCalendar(){ const year=getSelectedYear(); const { cloneRoot }=buildCloneForCapture(); const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background='#ffffff'; host.appendChild(cloneRoot); document.body.appendChild(host); try{ const captureCssW=Math.max(800, parseInt(document.getElementById('captureWidth')?.value || '2200',10)); cloneRoot.style.width=captureCssW+'px'; cloneRoot.style.maxWidth=captureCssW+'px'; await new Promise(r=>requestAnimationFrame(r)); const fullH=Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height); const canvas=await html2canvas(cloneRoot,{ backgroundColor:'#ffffff', useCORS:true, width:captureCssW, height:fullH, windowWidth:captureCssW, windowHeight:fullH, scrollX:0, scrollY:0, scale:2.0 }); const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); link.remove(); }catch(err){ console.error('PNG export failed:',err); alert('Sorry, generating the image failed.'); } finally { document.body.removeChild(host); } }
 
-      const CSS_PPI=96, TARGET_DPI=300; const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;
-      const contentCssW = Math.round((PAGE_IN_W-2*MARGIN_IN) * CSS_PPI); // ~768
-      const contentCssH = Math.round((PAGE_IN_H-2*MARGIN_IN) * CSS_PPI); // ~1008
+    async function downloadCalendarPDF(){ const { jsPDF } = window.jspdf || {}; if(!jsPDF){ alert('PDF library is still loading.'); return; } const year=getSelectedYear(); const { cloneRoot }=buildCloneForCapture(); const CSS_PPI=96, TARGET_DPI=300; const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25; const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI), contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI); const fitBox=document.createElement('div'); fitBox.style.position='fixed'; fitBox.style.left='-99999px'; fitBox.style.top='0'; fitBox.style.background='#fff'; fitBox.style.width=contentCssW+'px'; fitBox.style.minHeight=contentCssH+'px'; fitBox.style.overflow='hidden'; const inner=document.createElement('div'); inner.style.transformOrigin='top left'; inner.appendChild(cloneRoot); fitBox.appendChild(inner); document.body.appendChild(fitBox); cloneRoot.style.width=contentCssW+'px'; cloneRoot.style.maxWidth=contentCssW+'px'; await new Promise(r=>requestAnimationFrame(r)); const naturalH=Math.ceil(fitBox.scrollHeight||fitBox.getBoundingClientRect().height); const scale=Math.min(1, contentCssH/naturalH); inner.style.transform=`scale(${scale})`; const finalH=Math.max(1, Math.floor(naturalH*scale)); const canvas=await html2canvas(fitBox,{ backgroundColor:'#ffffff', useCORS:true, width:contentCssW, height:finalH, windowWidth:contentCssW, windowHeight:finalH, scrollX:0, scrollY:0, scale: TARGET_DPI / CSS_PPI }); const pageW=612, pageH=792, MARGIN_PT=72*MARGIN_IN; const maxW=pageW-2*MARGIN_PT; const pxToPt=px=>(px/96)*72; const imgWpt=pxToPt(canvas.width), imgHpt=pxToPt(canvas.height); const drawW=maxW, drawH=imgHpt*(drawW/imgWpt); const offX=(pageW-drawW)/2, offY=(pageH-drawH)/2; const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false}); if(typeof pdf.setCompression==='function') pdf.setCompression(false); pdf.addImage(canvas.toDataURL('image/png'),'PNG', offX, offY, drawW, drawH); pdf.save(`Shift-Calendar-${year}.pdf`); document.body.removeChild(fitBox); }
 
-      // Fit box with transform scale so nothing overflows
-      const fitBox=document.createElement('div');
-      fitBox.style.position='fixed'; fitBox.style.left='-99999px'; fitBox.style.top='0';
-      fitBox.style.background='#fff'; fitBox.style.width=contentCssW+'px'; fitBox.style.minHeight=contentCssH+'px'; fitBox.style.overflow='hidden';
-      const inner=document.createElement('div'); inner.style.transformOrigin='top left'; inner.appendChild(cloneRoot); fitBox.appendChild(inner); document.body.appendChild(fitBox);
-
-      cloneRoot.style.width=contentCssW+'px'; cloneRoot.style.maxWidth=contentCssW+'px';
-      await new Promise(r=>requestAnimationFrame(r));
-      const naturalH=Math.ceil(fitBox.scrollHeight||fitBox.getBoundingClientRect().height);
-      const scale=Math.min(1, contentCssH/naturalH); inner.style.transform=`scale(${scale})`;
-      const finalH=Math.max(1, Math.floor(naturalH*scale));
-
-      const canvas=await html2canvas(fitBox, { backgroundColor:'#ffffff', useCORS:true, width:contentCssW, height:finalH, windowWidth:contentCssW, windowHeight:finalH, scrollX:0, scrollY:0, scale: TARGET_DPI / CSS_PPI });
-
-      const pageW=612, pageH=792, MARGIN_PT=72*MARGIN_IN; const maxW=pageW-2*MARGIN_PT, maxH=pageH-2*MARGIN_PT;
-      const pxToPt=px=>(px/96)*72; const imgWpt=pxToPt(canvas.width), imgHpt=pxToPt(canvas.height);
-      const drawW=maxW; const drawH=imgHpt*(drawW/imgWpt); const offX=(pageW-drawW)/2, offY=(pageH-drawH)/2;
-
-      const pdf=new jsPDF({ orientation:'p', unit:'pt', format:'letter', compress:false });
-      if (typeof pdf.setCompression==='function') pdf.setCompression(false);
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offX, offY, drawW, drawH);
-      pdf.save(`Shift-Calendar-${year}.pdf`);
-
-      document.body.removeChild(fitBox);
-    }
+    // --- Controls accordion (mobile) ---
+    function setControlsCollapsed(collapsed){ const controls=document.querySelector('.controls'); const toggle=document.getElementById('controlsToggle'); if(!controls||!toggle) return; if(collapsed){ controls.classList.add('is-collapsed'); toggle.setAttribute('aria-expanded','false'); toggle.textContent='Show Controls'; try{ localStorage.setItem(LS_KEYS.controls,'1'); }catch(e){} } else { controls.classList.remove('is-collapsed'); toggle.setAttribute('aria-expanded','true'); toggle.textContent='Hide Controls'; try{ localStorage.setItem(LS_KEYS.controls,'0'); }catch(e){} } }
 
     // Init references
     document.title='North Slope Shift Calendar';
-    const yearSelect=document.getElementById('yearSelect'); const daysOn=document.getElementById('daysOn'); const daysOff=document.getElementById('daysOff'); const startDate=document.getElementById('startDate'); const layoutStyle=document.getElementById('layoutStyle'); const workColor=document.getElementById('workColor'); const travelColor=document.getElementById('travelColor'); const tintStrength=document.getElementById('tintStrength'); const nameField=document.getElementById('nameField'); const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper'); const calendar=document.getElementById('calendar'); const nameInline=document.getElementById('nameInline'); const nameInlineText=document.getElementById('nameInlineText');
+    const yearSelect=document.getElementById('yearSelect'); const daysOn=document.getElementById('daysOn'); const daysOff=document.getElementById('daysOff'); const startDate=document.getElementById('startDate'); const layoutStyle=document.getElementById('layoutStyle'); const workColor=document.getElementById('workColor'); const travelColor=document.getElementById('travelColor'); const tintStrength=document.getElementById('tintStrength'); const nameField=document.getElementById('nameField'); const captureWidth=document.getElementById('captureWidth'); const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper'); const calendar=document.getElementById('calendar'); const nameInline=document.getElementById('nameInline'); const nameInlineText=document.getElementById('nameInlineText');
 
     loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
+
+    // Setup controls toggle state
+    (function(){ const toggle=document.getElementById('controlsToggle'); const stored=localStorage.getItem(LS_KEYS.controls); const preferCollapsed=(stored!==null)?(stored==='1'):window.matchMedia('(max-width:700px)').matches; setControlsCollapsed(preferCollapsed); if(toggle){ toggle.addEventListener('click', ()=>{ const collapsed=document.querySelector('.controls')?.classList.contains('is-collapsed'); setControlsCollapsed(!collapsed); }); } })();
+
+    // Auto-collapse after Update on phones
+    (function(){ const updateBtn=document.querySelector('.btn.btn-gen'); if(updateBtn){ updateBtn.addEventListener('click', ()=>{ if(window.matchMedia('(max-width:700px)').matches) setControlsCollapsed(true); }); } })();
   </script>
 </body>
 </html>
