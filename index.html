@@ -14,7 +14,6 @@
       --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
       --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff; --border-color:#eee;
       --border-strong:#000;
-      /* Dynamic tints (set by JS) */
       --on-tint-soft: rgba(52,152,219,0.12);
       --travel-tint-soft: rgba(230,126,34,0.14);
       --on-tint-strong: rgba(52,152,219,0.16);
@@ -216,9 +215,7 @@
       if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
     }catch(e){} }
 
-    function __hexToRGBA(hex, alpha) {
-      try { const h=(hex||'#000').replace('#',''); const n=parseInt(h,16); const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`; } catch(e){ return `rgba(0,0,0,${alpha||1})`; }
-    }
+    function __hexToRGBA(hex, alpha) { try { const h=(hex||'#000').replace('#',''); const n=parseInt(h,16); const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`; } catch(e){ return `rgba(0,0,0,${alpha||1})`; } }
 
     function updateColors(){
       const onHex = workColor?.value || '#3498db';
@@ -247,8 +244,7 @@
       workColor.value='#3498db'; travelColor.value='#e67e22'; tintStrength.value='16'; captureWidth.value='2000'; nameField.value=''; document.body.classList.remove('dark-mode');
       updateColors(); updateNameInline(); generateCalendar(); applyAutoScale(); saveSettings(); }
 
-    let currentScale=1;
-    function applyAutoScale(){ const w=calendarScaleWrapper, c=calendar; if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
+    let currentScale=1; function applyAutoScale(){ const w=calendarScaleWrapper, c=calendar; if(!w||!c) return; const DESIGN_WIDTH=1600; const ww=w.clientWidth||window.innerWidth; const s=Math.min(1, ww/ DESIGN_WIDTH); if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; } }
     function initAutoScale(){ applyAutoScale(); if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper); } else { window.addEventListener('resize',applyAutoScale); } }
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
 
@@ -257,21 +253,24 @@
 
     function generateCalendar(){ const dOn=parseInt(daysOn.value,10)||21; const dOff=parseInt(daysOff.value,10)||21; const startInput=startDate.value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=layoutStyle.value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=dOn+dOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-    // Build clone for exports (strip controls, normalize widths)
+    // Build clone for exports — force 3 columns and tighter widths so it fits Letter width
     function buildCloneForCapture(){
       const liveRoot=document.getElementById('calendar-capture-root');
       const cloneRoot=liveRoot.cloneNode(true);
-      cloneRoot.querySelectorAll('.controls').forEach(el=>el.remove());
-      cloneRoot.querySelectorAll('.mini-toolbar').forEach(el=>el.remove());
-      cloneRoot.querySelectorAll('.controls-toggle').forEach(el=>el.remove());
+      cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
       cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
-      const chip=cloneRoot.querySelector('.name-chip');
-      if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
+      const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
       cloneRoot.style.setProperty('--border-strong','#000');
-      const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper');
-      if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
+      const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper'); if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
       const cloneCal=cloneRoot.querySelector('#calendar');
-      if(cloneCal){ cloneCal.style.display='grid'; cloneCal.style.gridTemplateColumns='repeat(3, 1fr)'; cloneCal.style.margin='0 auto'; }
+      if(cloneCal){
+        cloneCal.style.display='grid';
+        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)';
+        cloneCal.style.gap='10px';
+        cloneCal.style.setProperty('--month-min','240px');
+        cloneCal.style.margin='0 auto';
+        cloneCal.style.width='100%'; cloneCal.style.maxWidth='100%';
+      }
       return { cloneRoot };
     }
 
@@ -287,7 +286,7 @@
         .finally(()=>{ document.body.removeChild(host); });
     }
 
-    // === HIGH-RES (300 dpi) LETTER PDF with full-height capture ===
+    // 300 dpi Letter PDF — width-constrained, full-height capture, no cropping
     async function downloadCalendarPDF(){
       const { jsPDF } = window.jspdf || {};
       if(!jsPDF){ alert('PDF library is still loading. Please try again in a moment.'); return; }
@@ -296,29 +295,26 @@
       const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background='#ffffff'; host.appendChild(cloneRoot); document.body.appendChild(host);
       try{
         const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25; const CSS_PPI=96; const TARGET_DPI=300;
-        const contentInW = PAGE_IN_W - 2*MARGIN_IN; const contentInH = PAGE_IN_H - 2*MARGIN_IN;
-        const targetCssW = Math.round(contentInW * CSS_PPI);
-        const scale = TARGET_DPI / CSS_PPI; // ≈3.125
+        const contentInW = PAGE_IN_W - 2*MARGIN_IN; const targetCssW = Math.round(contentInW * CSS_PPI);
+        const scale = TARGET_DPI / CSS_PPI; // ~3.125
 
-        // Lock width to the printable area; let height be whatever the content needs
+        // Constrain width; allow height to expand naturally
         cloneRoot.style.width = targetCssW + 'px';
         cloneRoot.style.maxWidth = targetCssW + 'px';
+        const calendarEl = cloneRoot.querySelector('#calendar'); if(calendarEl){ calendarEl.style.width='100%'; calendarEl.style.maxWidth='100%'; }
 
-        // Compute the full rendered height so we don't crop anything
+        // Full DOM height after width lock
         const fullW = targetCssW;
         const fullH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
 
         const canvas = await window.html2canvas(cloneRoot, {
           backgroundColor:'#ffffff', useCORS:true,
-          width: fullW, height: fullH,
-          windowWidth: fullW, windowHeight: fullH,
+          width: fullW, height: fullH, windowWidth: fullW, windowHeight: fullH,
           scrollX:0, scrollY:0, scale: scale
         });
         const imgData = canvas.toDataURL('image/png');
 
-        // Compose Letter page with margins and fit
-        const pageW=612, pageH=792; // pt
-        const MARGIN_PT = 72*MARGIN_IN; const maxW = pageW - 2*MARGIN_PT; const maxH = pageH - 2*MARGIN_PT;
+        const pageW=612, pageH=792; const MARGIN_PT = 72*MARGIN_IN; const maxW = pageW - 2*MARGIN_PT; const maxH = pageH - 2*MARGIN_PT;
         const pxToPt = px => (px/CSS_PPI)*72; const imgWpt = pxToPt(canvas.width); const imgHpt = pxToPt(canvas.height);
         const fit = Math.min(maxW/imgWpt, maxH/imgHpt, 1); const drawW = imgWpt*fit; const drawH = imgHpt*fit;
         const offX = (pageW-drawW)/2; const offY = (pageH-drawH)/2;
@@ -327,7 +323,7 @@
         if (typeof pdf.setCompression === 'function') pdf.setCompression(false);
         pdf.addImage(imgData,'PNG', offX, offY, drawW, drawH);
         pdf.save(`Shift-Calendar-${year}.pdf`);
-      }catch(err){ console.error('PDF generation failed:',err); alert('Sorry, generating the PDF failed.'); }
+      }catch(err){ console.error('PDF generation failed:',err); alert('Sorry, generating the PDF failed. See the console for details.'); }
       finally{ document.body.removeChild(host); }
     }
 
@@ -335,17 +331,8 @@
       const controls = document.querySelector('.controls');
       const toggle   = document.getElementById('controlsToggle');
       if (!controls || !toggle) return;
-      if (collapsed) {
-        controls.classList.add('is-collapsed');
-        toggle.setAttribute('aria-expanded','false');
-        toggle.textContent = 'Show Controls';
-        try { localStorage.setItem(LS_KEYS.controls, '1'); } catch(e){}
-      } else {
-        controls.classList.remove('is-collapsed');
-        toggle.setAttribute('aria-expanded','true');
-        toggle.textContent = 'Hide Controls';
-        try { localStorage.setItem(LS_KEYS.controls, '0'); } catch(e){}
-      }
+      if (collapsed) { controls.classList.add('is-collapsed'); toggle.setAttribute('aria-expanded','false'); toggle.textContent = 'Show Controls'; try { localStorage.setItem(LS_KEYS.controls, '1'); } catch(e){} }
+      else { controls.classList.remove('is-collapsed'); toggle.setAttribute('aria-expanded','true'); toggle.textContent = 'Hide Controls'; try { localStorage.setItem(LS_KEYS.controls, '0'); } catch(e){} }
     }
 
     // Init references
@@ -354,7 +341,7 @@
 
     loadSettings(); updateColors(); updateNameInline(); generateCalendar(); initAutoScale();
 
-    (function(){ const toggle=document.getElementById('controlsToggle'); const stored=localStorage.getItem(LS_KEYS.controls); const preferCollapsed=(stored!==null)?(stored==='1'):window.matchMedia('(max-width:700px)').matches; setControlsCollapsed(preferCollapsed); if(toggle){ toggle.addEventListener('click',()=>{ const collapsed=document.querySelector('.controls')?.classList.contains('is-collapsed'); setControlsCollapsed(!collapsed); }); } })();
+    (function(){ const toggle=document.getElementById('controlsToggle'); const stored=localStorage.getItem(LS_KEYS.controls); const preferCollapsed=(stored!==null)?(stored==='1'):window.matchMedia('(max-width:700px)').matches; setControlsCollapsed(preferCollapsed); if(toggle){ toggle.addEventListener('click', ()=>{ const collapsed=document.querySelector('.controls')?.classList.contains('is-collapsed'); setControlsCollapsed(!collapsed); }); } })();
     (function(){ const updateBtn=document.querySelector('.btn.btn-gen'); if(updateBtn){ updateBtn.addEventListener('click', ()=>{ if(window.matchMedia('(max-width:700px)').matches) setControlsCollapsed(true); }); } })();
 
     layoutStyle.addEventListener('change', saveSettings); daysOn.addEventListener('input', saveSettings); daysOff.addEventListener('input', saveSettings); startDate.addEventListener('input', saveSettings); workColor.addEventListener('input', saveSettings); travelColor.addEventListener('input', saveSettings); tintStrength.addEventListener('input', saveSettings); nameField.addEventListener('input', saveSettings);
