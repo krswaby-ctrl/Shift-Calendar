@@ -6,9 +6,9 @@
   <title>North Slope Shift Calendar</title>
 
   <!-- Icons / Manifest (optional but recommended) -->
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
 
   <style>
   :root{
@@ -88,8 +88,7 @@
   }
   input[type=range]{ width:180px; }
   .btn{ padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; font-size:.95rem; }
-  .btn-gen{ background:#2ecc71; color:#fff; }
-  .btn-dark{ background:#34495e; color:#fff; }
+  .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; }
 
   /* Calendar layouts */
   .calendar-grid{ display:grid; gap:22px; --month-min:340px; }
@@ -235,7 +234,7 @@
   </style>
 
   <!-- html2canvas (used only when you click “Download Image”) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaPDe0FQ3g8Hj2Rkz0Xn5ZVbNw/i6q3kZbNMD0S6t7P2hFZgK6JjCqk0j2a8J8l+6r8pZ2L8zO3mMs4n3Gf1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
   <div id="calendar-capture-root">
@@ -291,3 +290,366 @@
       <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendarImage()">Download Image</button>
 
       <!-- Hidden input kept for backward compatibility (ignored by image export) -->
+      <input type="hidden" id="captureWidth" value="2200">
+
+      <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
+    </div>
+
+    <div id="calendar-scale-wrapper">
+      <div id="calendar" class="calendar-grid"></div>
+    </div>
+  </div>
+
+  <script>
+  const LS_KEYS = {
+    year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start',
+    style:'sc_style', work:'sc_workColor', travel:'sc_travelColor',
+    dark:'sc_darkMode', name:'sc_name', tint:'sc_tint',
+    capture:'sc_capture', controls:'sc_controls_collapsed'
+  };
+
+  function saveSettings(){
+    try{
+      localStorage.setItem(LS_KEYS.year, yearSelect.value);
+      localStorage.setItem(LS_KEYS.on, daysOn.value);
+      localStorage.setItem(LS_KEYS.off, daysOff.value);
+      localStorage.setItem(LS_KEYS.start, startDate.value);
+      localStorage.setItem(LS_KEYS.style, layoutStyle.value);
+      localStorage.setItem(LS_KEYS.work, workColor.value);
+      localStorage.setItem(LS_KEYS.travel, travelColor.value);
+      localStorage.setItem(LS_KEYS.tint, tintStrength.value);
+      if(captureWidth) localStorage.setItem(LS_KEYS.capture, captureWidth.value);
+      localStorage.setItem(LS_KEYS.dark, document.body.classList.contains('dark-mode') ? '1':'0');
+      if(nameField) localStorage.setItem(LS_KEYS.name, nameField.value.trim());
+    }catch(e){}
+  }
+  function loadSettings(){
+    try{
+      const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; };
+      setIf(yearSelect,LS_KEYS.year);
+      setIf(daysOn,LS_KEYS.on);
+      setIf(daysOff,LS_KEYS.off);
+      setIf(startDate,LS_KEYS.start);
+      setIf(layoutStyle,LS_KEYS.style);
+      setIf(workColor,LS_KEYS.work);
+      setIf(travelColor,LS_KEYS.travel);
+      setIf(nameField,LS_KEYS.name);
+      setIf(tintStrength,LS_KEYS.tint);
+      const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap;
+      if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
+    }catch(e){}
+  }
+
+  function __hexToRGBA(hex, alpha) {
+    try {
+      const h=(hex ?? '#000').replace('#','');
+      const n=parseInt(h,16);
+      const r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    } catch(e){ return `rgba(0,0,0,${alpha ?? 1})`; }
+  }
+
+  /* Tint now drives ALL styles */
+  function updateColors(){
+    const onHex = workColor?.value ?? '#3498db';
+    const trHex = travelColor?.value ?? '#e67e22';
+
+    // Base % from slider (8..30 in UI)
+    const basePct = parseInt(tintStrength?.value ?? '16', 10);
+
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+    // Derived intensities for different themes
+    const softOnPct    = clamp(basePct - 4,  5, 40);  // Clean Grid
+    const softTrPct    = clamp(basePct - 2,  5, 40);
+    const strongOnPct  = clamp(basePct + 0,  5, 40);  // Wall / Poster
+    const strongTrPct  = clamp(basePct + 2,  5, 40);
+
+    const solidOnPct   = clamp(basePct + 10, 5, 95);  // Standard (gradient first stop)
+    const solidTrPct   = clamp(basePct + 10, 5, 95);
+
+    const auroraOnPct  = clamp(basePct + 35, 55, 95); // Aurora (gradient first stop)
+    const auroraTrPct  = clamp(basePct + 35, 55, 95);
+
+    // Base colors
+    document.documentElement.style.setProperty('--on-color', onHex);
+    document.documentElement.style.setProperty('--travel-color', trHex);
+
+    // Clean Grid & Wall tints
+    document.documentElement.style.setProperty('--on-tint-soft',       __hexToRGBA(onHex, softOnPct/100));
+    document.documentElement.style.setProperty('--travel-tint-soft',    __hexToRGBA(trHex, softTrPct/100));
+    document.documentElement.style.setProperty('--on-tint-strong',     __hexToRGBA(onHex, strongOnPct/100));
+    document.documentElement.style.setProperty('--travel-tint-strong',  __hexToRGBA(trHex, strongTrPct/100));
+
+    // Standard (Classic)
+    document.documentElement.style.setProperty('--on-solid-rgba',       __hexToRGBA(onHex, solidOnPct/100));
+    document.documentElement.style.setProperty('--travel-solid-rgba',   __hexToRGBA(trHex, solidTrPct/100));
+
+    // Aurora
+    document.documentElement.style.setProperty('--on-aurora-rgba',      __hexToRGBA(onHex, auroraOnPct/100));
+    document.documentElement.style.setProperty('--travel-aurora-rgba',  __hexToRGBA(trHex, auroraTrPct/100));
+  }
+
+  function handleNameInput(){ updateNameInline(); saveSettings(); }
+  function updateNameInline(){
+    const val=(nameField.value ?? '').trim();
+    const wrap=nameInline; const text=nameInlineText;
+    if(val){ text.textContent=val; wrap.style.display='inline-flex'; }
+    else   { text.textContent='';  wrap.style.display='none'; }
+  }
+
+  function resetSettings(){
+    if(!confirm('Reset all settings to defaults?')) return;
+    try{ Object.values(LS_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+    yearSelect.value=new Date().getFullYear();
+    daysOn.value=21; daysOff.value=21; startDate.value='2026-01-08';
+    layoutStyle.value='layout-wall theme-wall';
+    workColor.value='#3498db'; travelColor.value='#e67e22';
+    tintStrength.value='16'; captureWidth.value='2200'; nameField.value='';
+    document.body.classList.remove('dark-mode');
+    updateColors(); updateNameInline(); generateCalendar();
+  }
+
+  let currentScale=1;
+  function applyAutoScale(){
+    const w=calendarScaleWrapper, c=calendar; if(!w || !c) return;
+    const DESIGN_WIDTH=1600;
+    const ww=w.clientWidth ?? window.innerWidth;
+    const s=Math.min(1, ww/ DESIGN_WIDTH);
+    if(Math.abs(s-currentScale)>.005){
+      currentScale=s;
+      w.style.transformOrigin='top center';
+      w.style.transform=`scale(${s})`;
+    }
+  }
+  function initAutoScale(){
+    applyAutoScale();
+    if(window.ResizeObserver){
+      (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper);
+    } else {
+      window.addEventListener('resize',applyAutoScale);
+    }
+  }
+
+  function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
+  function getSelectedYear(){ const y=parseInt(yearSelect.value,10); return Number.isFinite(y)?y:(new Date()).getFullYear(); }
+  function handleYearChange(){ generateCalendar(); saveSettings(); }
+
+  function generateCalendar(){
+    const dOn=parseInt(daysOn.value,10) ?? 21;
+    const dOff=parseInt(daysOff.value,10) ?? 21;
+    const startInput=startDate.value ?? '2026-01-08';
+    const year=getSelectedYear();
+    const layoutClasses=layoutStyle.value;
+    const startShift=new Date(startInput+'T00:00:00');
+    const today=new Date(); today.setHours(0,0,0,0);
+
+    const container=calendar;
+    container.className='calendar-grid '+layoutClasses;
+    container.innerHTML='';
+
+    const cycle=dOn+dOff;
+
+    for(let m=0;m<12;m++){
+      const monthDiv=document.createElement('div'); monthDiv.className='month';
+      const first=new Date(year,m,1);
+      let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`;
+      html+=`<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
+      for(let i=0;i<first.getDay();i++) html+='<div class="day empty"></div>';
+
+      const date=new Date(year,m,1);
+      while(date.getMonth()===m){
+        const diff=Math.round((date.getTime()-startShift.getTime())/86400000);
+        let pos=diff%(cycle); if(pos<0) pos+=cycle;
+        const type=(pos===0 || pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day';
+        const isToday=(date.getTime()===today.getTime())?'today':'';
+        html+=`<div class="day ${type} ${isToday}">${date.getDate()}</div>`;
+        date.setDate(date.getDate()+1);
+      }
+      monthDiv.innerHTML=html+'</div>';
+      container.appendChild(monthDiv);
+    }
+    saveSettings();
+    requestAnimationFrame(applyAutoScale);
+  }
+
+  /* ---- Letter-sized PNG export (8.5"x11" content area @300 DPI) ---- */
+  function buildCloneForLetterPNG() {
+    const liveRoot = document.getElementById('calendar-capture-root');
+    const cloneRoot = liveRoot.cloneNode(true);
+
+    // Apply readable preset
+    cloneRoot.classList.add('png-letter');
+
+    // Remove UI chrome only; keep title, legend, and name chip
+    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle')
+      .forEach(el => el.remove());
+
+    // High-contrast name chip for print
+    const chip = cloneRoot.querySelector('.name-chip');
+    if (chip) {
+      chip.style.background = 'transparent';
+      chip.style.color = '#000';
+      chip.style.boxShadow = 'none';
+      chip.style.padding = '0';
+    }
+
+    // Remove autoscale transform; lay out naturally
+    const wrap = cloneRoot.querySelector('#calendar-scale-wrapper');
+    if (wrap) {
+      wrap.style.transform = 'none';
+      wrap.style.width = '100%';
+    }
+
+    // Ensure a 3×4 grid uses full width
+    const cal = cloneRoot.querySelector('#calendar');
+    if (cal) {
+      cal.style.display = 'grid';
+      cal.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      cal.style.gap = '10px';
+      cal.style.margin = '0 auto';
+      cal.style.width = '100%';
+      cal.style.maxWidth = '100%';
+    }
+    return { cloneRoot };
+  }
+
+  /**
+   * Download a Letter-sized PNG that fills the printable area.
+   * Includes only: Title, Name (if present), Legend, full 12-month calendar.
+   * Print with the same margins (default 0.25") and "Actual size" (100%).
+   *
+   * @param {number} marginIn  Margin in inches (default 0.25" on all sides)
+   * @param {number} dpi       Target DPI (default 300)
+   */
+  async function downloadCalendarImage(marginIn = 0.25, dpi = 300) {
+    const year = getSelectedYear();
+    const CSS_PPI = 96;            // CSS pixels per inch (browser)
+    const PAGE_IN_W = 8.5, PAGE_IN_H = 11;
+
+    // Compute the content box (inside margins) in CSS pixels
+    const contentCssW = Math.round((PAGE_IN_W - 2 * marginIn) * CSS_PPI);
+    const contentCssH = Math.round((PAGE_IN_H - 2 * marginIn) * CSS_PPI);
+
+    // Prepare a print-friendly clone
+    const { cloneRoot } = buildCloneForLetterPNG();
+
+    // Off-screen host sized exactly to the content box
+    const fitBox = document.createElement('div');
+    fitBox.style.position = 'fixed';
+    fitBox.style.left = '-99999px';
+    fitBox.style.top = '0';
+    fitBox.style.background = '#fff';
+    fitBox.style.width = contentCssW + 'px';
+    fitBox.style.height = contentCssH + 'px';
+    fitBox.style.overflow = 'hidden';
+
+    const inner = document.createElement('div');
+    inner.style.transformOrigin = 'top left';
+    inner.appendChild(cloneRoot);
+    fitBox.appendChild(inner);
+    document.body.appendChild(fitBox);
+
+    // Lay out the clone at the target width
+    cloneRoot.style.width = contentCssW + 'px';
+    cloneRoot.style.maxWidth = contentCssW + 'px';
+
+    // Wait a frame for layout
+    await new Promise(r => requestAnimationFrame(r));
+
+    // Scale to fill height (width already fits)
+    const naturalH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
+    const scale = contentCssH / naturalH;
+    inner.style.transform = `scale(${scale})`;
+
+    // Render at DPI (e.g., 300) — multiplies CSS px to raster px for print crispness
+    const canvas = await html2canvas(fitBox, {
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      width: contentCssW,
+      height: contentCssH,
+      windowWidth: contentCssW,
+      windowHeight: contentCssH,
+      scrollX: 0,
+      scrollY: 0,
+      scale: dpi / CSS_PPI
+    });
+
+    // Create a downloadable PNG
+    const link = document.createElement('a');
+    link.download = `Shift-Calendar-${year}-Letter.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Cleanup
+    document.body.removeChild(fitBox);
+  }
+
+  /* ---- Mobile controls accordion ---- */
+  function setControlsCollapsed(collapsed){
+    const controls=document.querySelector('.controls');
+    const toggle=document.getElementById('controlsToggle');
+    if(!controls || !toggle) return;
+    if(collapsed){
+      controls.classList.add('is-collapsed');
+      toggle.setAttribute('aria-expanded','false'); toggle.textContent='Show Controls';
+      try{ localStorage.setItem(LS_KEYS.controls,'1'); }catch(e){}
+    } else {
+      controls.classList.remove('is-collapsed');
+      toggle.setAttribute('aria-expanded','true'); toggle.textContent='Hide Controls';
+      try{ localStorage.setItem(LS_KEYS.controls,'0'); }catch(e){}
+    }
+  }
+
+  /* ---- Init ---- */
+  document.title='North Slope Shift Calendar';
+  const yearSelect=document.getElementById('yearSelect');
+  const daysOn=document.getElementById('daysOn');
+  const daysOff=document.getElementById('daysOff');
+  const startDate=document.getElementById('startDate');
+  const layoutStyle=document.getElementById('layoutStyle');
+  const workColor=document.getElementById('workColor');
+  const travelColor=document.getElementById('travelColor');
+  const tintStrength=document.getElementById('tintStrength');
+  const nameField=document.getElementById('nameField');
+  const captureWidth=document.getElementById('captureWidth');
+  const calendarScaleWrapper=document.getElementById('calendar-scale-wrapper');
+  const calendar=document.getElementById('calendar');
+  const nameInline=document.getElementById('nameInline');
+  const nameInlineText=document.getElementById('nameInlineText');
+
+  // Order matters here: load -> apply theme vars -> update name chip -> build calendar -> scale
+  loadSettings();
+  updateColors();
+  updateNameInline();
+  generateCalendar();
+  initAutoScale();
+
+  // Setup controls toggle state (on phones it may start collapsed)
+  (function(){
+    const toggle=document.getElementById('controlsToggle');
+    const stored=localStorage.getItem(LS_KEYS.controls);
+    const preferCollapsed=(stored!==null)?(stored==='1'):window.matchMedia('(max-width:700px)').matches;
+    setControlsCollapsed(preferCollapsed);
+    if(toggle){
+      toggle.addEventListener('click', ()=>{
+        const collapsed=document.querySelector('.controls')?.classList.contains('is-collapsed');
+        setControlsCollapsed(!collapsed);
+      });
+    }
+  })();
+
+  // Auto-collapse after Update on phones
+  (function(){
+    const updateBtn=document.querySelector('.btn.btn-gen');
+    if(updateBtn){
+      updateBtn.addEventListener('click', ()=>{
+        if(window.matchMedia('(max-width:700px)').matches) setControlsCollapsed(true);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
