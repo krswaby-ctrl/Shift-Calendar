@@ -76,12 +76,12 @@
 
     .theme-aurora .month { border:2px solid var(--border-strong); border-radius:16px; background: radial-gradient(1200px 600px at -10% -20%, rgba(52,152,219,.12), transparent 60%), radial-gradient(1000px 500px at 120% 10%, rgba(230,126,34,.12), transparent 55%), #ffffff; box-shadow:0 14px 32px rgba(0,0,0,.12); overflow:hidden; }
     .theme-aurora h3 { color:#fff; text-transform:uppercase; letter-spacing:.12em; font-weight:900; margin:-18px -18px 14px -18px; padding:16px 14px; background:linear-gradient(135deg, var(--on-color), var(--travel-color)); border:none; font-size:1.25rem; text-shadow:0 1px 0 rgba(0,0,0,.25); }
-    .theme-aurora .weekday-header { background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,0)); color:#2c3e50; font-weight:900; letter-spacing:.04em; border:1px solid rgba(0,0,0,.12); border-left:none; border-right:none; }
+    .theme-aurora .weekday-header { background: linear-gradient(90deg, rgba(0,0,0,.03), rgba(0,0,0,0)); color:#2c3e50; font-weight:900; letter-spacing:.04em; border: 1px solid rgba(0,0,0,.12); border-left:none; border-right:none; }
     .theme-aurora .day { border-radius:10px; background:#f9fbff; position:relative; overflow:hidden; }
     .theme-aurora .day::after { content:""; position:absolute; inset:0; pointer-events:none; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.4) 0 6px, rgba(255,255,255,0) 6px 12px); mix-blend-mode: overlay; }
     .theme-aurora .off-day { background:#f3f6fb; color:#213042; }
-    .theme-aurora .on-shift { background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color)); color:#fff; border-color: var(--on-color); text-shadow:0 1px 0 rgba(0,0,0,.25); }
-    .theme-aurora .travel-day { background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color)); color:#fff; border-color: var(--travel-color); text-shadow:0 1px 0 rgba(0,0,0,.25); }
+    .theme-aurora .on-shift { background: linear-gradient(135deg, rgba(52,152,219,0.85), var(--on-color)); color:#fff; border-color: var(--on-color); text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+    .theme-aurora .travel-day { background: linear-gradient(135deg, rgba(230,126,34,0.85), var(--travel-color)); color:#fff; border-color: var(--travel-color); text-shadow: 0 1px 0 rgba(0,0,0,.25); }
 
     .theme-clean-grid .month { border:2px solid #000; box-shadow:none; background:#fff; }
     .theme-clean-grid h3 { color:#111; background:#f1f3f5; border:none; padding:12px; border-radius:6px; }
@@ -98,20 +98,13 @@
     .theme-wall .on-shift { background: var(--on-tint-strong) !important; color:#0b3e69; border-color:#000 !important; }
     .theme-wall .travel-day { background: var(--travel-tint-strong) !important; color:#6a350a; border-color:#000 !important; }
 
-    @media print{
-      @page{ size:auto; margin:0.25in; }
-      .controls,.btn-print,.btn-dark{ display:none!important; }
-      #calendar-scale-wrapper{ transform:none!important; width:100%!important; }
-      #calendar-scale-wrapper > #calendar{ width:100%!important; max-width:none!important; }
-      body{ background:#fff!important; color:#000!important; padding:0!important; }
-      .calendar-grid{ display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:10px!important; }
-      .month{ border:2px solid #000!important; box-shadow:none!important; page-break-inside:avoid; padding:14px!important; font-size:1rem!important; background:#fff!important; }
-      .weekday-header{ color:#444!important; font-size:1em!important; }
-      .day{ border:2px solid #000!important; font-size:1.05em!important; }
-      .name-chip{ background:transparent!important; color:#000!important; box-shadow:none!important; padding:0!important; }
-      .name-chip .label{ display:none!important; }
-      .name-chip .value{ font-weight:800!important; font-size:1.1rem!important; }
-    }
+    /* PDF-only compact overrides */
+    .pdf-mode .calendar-grid{ grid-template-columns:repeat(3,1fr)!important; gap:10px!important; --month-min:240px!important; }
+    .pdf-mode .month{ padding:14px!important; }
+    .pdf-mode .weekday-header{ margin-bottom:8px!important; }
+    .pdf-mode h3{ padding-bottom:8px!important; }
+
+    @media print{ @page{ size:auto; margin:0.25in; } }
 
     @media (min-width:780px){ .controls .btn{ width:auto; } .controls{ grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); } }
     @media (max-width:700px){ .header-container{ grid-template-columns:1fr; justify-items:center; text-align:center; gap:10px; } #pageTitle{ justify-self:center; } .legend{ justify-self:center; } #calendar-scale-wrapper{ margin-top:4px; } }
@@ -253,40 +246,22 @@
 
     function generateCalendar(){ const dOn=parseInt(daysOn.value,10)||21; const dOff=parseInt(daysOff.value,10)||21; const startInput=startDate.value||'2026-01-08'; const year=getSelectedYear(); const layoutClasses=layoutStyle.value; const startShift=new Date(startInput+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML=''; const cycle=dOn+dOff; for(let m=0;m<12;m++){ const monthDiv=document.createElement('div'); monthDiv.className='month'; const first=new Date(year,m,1); let html=`<h3>${first.toLocaleString('default',{month:'long'})}</h3>`; html+=`<div class=\"weekday-header\"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class=\"days\">`; for(let i=0;i<first.getDay();i++) html+='<div class=\"day empty\"></div>'; const date=new Date(year,m,1); while(date.getMonth()===m){ const diff=Math.round((date.getTime()-startShift.getTime())/86400000); let pos=diff%cycle; if(pos<0) pos+=cycle; const type=(pos===0||pos===dOn)?'travel-day': (pos>0&&pos<dOn)?'on-shift':'off-day'; const isToday=(date.getTime()===today.getTime())?'today':''; html+=`<div class=\"day ${type} ${isToday}\">${date.getDate()}</div>`; date.setDate(date.getDate()+1); } monthDiv.innerHTML=html+'</div>'; container.appendChild(monthDiv);} saveSettings(); requestAnimationFrame(applyAutoScale); }
 
-    // Build clone for exports — force 3 columns and tighter widths so it fits Letter width
+    // Build a clone tailored for PDF: 3 columns and pdf-mode tweaks
     function buildCloneForCapture(){
       const liveRoot=document.getElementById('calendar-capture-root');
       const cloneRoot=liveRoot.cloneNode(true);
+      cloneRoot.classList.add('pdf-mode');
       cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
       cloneRoot.querySelectorAll('.name-chip .label').forEach(el=>el.remove());
       const chip=cloneRoot.querySelector('.name-chip'); if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
       cloneRoot.style.setProperty('--border-strong','#000');
-      const cloneWrapper=cloneRoot.querySelector('#calendar-scale-wrapper'); if(cloneWrapper){ cloneWrapper.style.transform='none'; cloneWrapper.style.width='100%'; }
-      const cloneCal=cloneRoot.querySelector('#calendar');
-      if(cloneCal){
-        cloneCal.style.display='grid';
-        cloneCal.style.gridTemplateColumns='repeat(3, 1fr)';
-        cloneCal.style.gap='10px';
-        cloneCal.style.setProperty('--month-min','240px');
-        cloneCal.style.margin='0 auto';
-        cloneCal.style.width='100%'; cloneCal.style.maxWidth='100%';
-      }
+      const wrap=cloneRoot.querySelector('#calendar-scale-wrapper'); if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; }
+      const cal=cloneRoot.querySelector('#calendar');
+      if(cal){ cal.style.display='grid'; cal.style.gridTemplateColumns='repeat(3, 1fr)'; cal.style.gap='10px'; cal.style.margin='0 auto'; cal.style.width='100%'; cal.style.maxWidth='100%'; }
       return { cloneRoot };
     }
 
-    function downloadCalendar(){
-      const year=getSelectedYear();
-      const bg=document.body.classList.contains('dark-mode')?'#1a1a1a':'#ffffff';
-      const { cloneRoot }=buildCloneForCapture();
-      const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background=bg; host.appendChild(cloneRoot); document.body.appendChild(host);
-      if(!window.html2canvas){ alert('Download library is still loading. Please wait a moment and try again.'); document.body.removeChild(host); return; }
-      window.html2canvas(cloneRoot,{ scale:2.5,useCORS:true,backgroundColor:bg,scrollX:0,scrollY:0 })
-        .then(canvas=>{ const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png'); link.click(); })
-        .catch(err=>{ console.error('html2canvas failed:',err); alert('Sorry, generating the image failed. See the console for details.'); })
-        .finally(()=>{ document.body.removeChild(host); });
-    }
-
-    // 300 dpi Letter PDF — width-constrained, full-height capture, no cropping
+    // 300dpi PDF export that auto-resizes to fill page without cropping across themes
     async function downloadCalendarPDF(){
       const { jsPDF } = window.jspdf || {};
       if(!jsPDF){ alert('PDF library is still loading. Please try again in a moment.'); return; }
@@ -294,30 +269,47 @@
       const { cloneRoot }=buildCloneForCapture();
       const host=document.createElement('div'); host.style.position='fixed'; host.style.left='-99999px'; host.style.top='0'; host.style.zIndex='-1'; host.style.background='#ffffff'; host.appendChild(cloneRoot); document.body.appendChild(host);
       try{
-        const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25; const CSS_PPI=96; const TARGET_DPI=300;
-        const contentInW = PAGE_IN_W - 2*MARGIN_IN; const targetCssW = Math.round(contentInW * CSS_PPI);
-        const scale = TARGET_DPI / CSS_PPI; // ~3.125
+        const CSS_PPI=96, TARGET_DPI=300;               // screen → print mapping
+        const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;  // US Letter with 1/4" margins
+        const contentInW = PAGE_IN_W - 2*MARGIN_IN;         // 8.0"
+        const contentInH = PAGE_IN_H - 2*MARGIN_IN;         // 10.5"
+        const maxCssW = Math.round(contentInW * CSS_PPI);   // ≈768 css px
+        const maxCssH = Math.round(contentInH * CSS_PPI);   // ≈1008 css px
 
-        // Constrain width; allow height to expand naturally
-        cloneRoot.style.width = targetCssW + 'px';
-        cloneRoot.style.maxWidth = targetCssW + 'px';
-        const calendarEl = cloneRoot.querySelector('#calendar'); if(calendarEl){ calendarEl.style.width='100%'; calendarEl.style.maxWidth='100%'; }
+        // Start at full content width and iteratively shrink if height would exceed limit
+        let cssW = maxCssW;
+        let cssH;
+        const reflow = () => new Promise(r => requestAnimationFrame(r));
+        for(let i=0;i<4;i++){
+          cloneRoot.style.width = cssW + 'px';
+          cloneRoot.style.maxWidth = cssW + 'px';
+          await reflow();
+          cssH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
+          if(cssH <= maxCssH) break;
+          // reduce width proportionally to height overflow with a safety factor
+          const ratio = maxCssH / cssH; // <1 if too tall
+          cssW = Math.max(560, Math.floor(cssW * ratio * 0.98)); // floor width but keep reasonable min
+        }
 
-        // Full DOM height after width lock
-        const fullW = targetCssW;
-        const fullH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
+        const scale = TARGET_DPI / CSS_PPI; // ≈3.125 → ~300dpi
 
         const canvas = await window.html2canvas(cloneRoot, {
           backgroundColor:'#ffffff', useCORS:true,
-          width: fullW, height: fullH, windowWidth: fullW, windowHeight: fullH,
-          scrollX:0, scrollY:0, scale: scale
+          width: cssW,
+          height: Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height),
+          windowWidth: cssW,
+          windowHeight: Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height),
+          scrollX:0, scrollY:0, scale
         });
         const imgData = canvas.toDataURL('image/png');
 
-        const pageW=612, pageH=792; const MARGIN_PT = 72*MARGIN_IN; const maxW = pageW - 2*MARGIN_PT; const maxH = pageH - 2*MARGIN_PT;
+        // Drop into Letter page with margins, maximize size without cropping
+        const pageW=612, pageH=792, MARGIN_PT = 72*MARGIN_IN;  // pt
+        const maxW = pageW - 2*MARGIN_PT, maxH = pageH - 2*MARGIN_PT;
         const pxToPt = px => (px/CSS_PPI)*72; const imgWpt = pxToPt(canvas.width); const imgHpt = pxToPt(canvas.height);
-        const fit = Math.min(maxW/imgWpt, maxH/imgHpt, 1); const drawW = imgWpt*fit; const drawH = imgHpt*fit;
-        const offX = (pageW-drawW)/2; const offY = (pageH-drawH)/2;
+        const fit = Math.min(maxW/imgWpt, maxH/imgHpt, 1);
+        const drawW = imgWpt*fit, drawH = imgHpt*fit;
+        const offX = (pageW-drawW)/2, offY = (pageH-drawH)/2;
 
         const pdf = new jsPDF({ orientation:'p', unit:'pt', format:'letter', compress:false });
         if (typeof pdf.setCompression === 'function') pdf.setCompression(false);
