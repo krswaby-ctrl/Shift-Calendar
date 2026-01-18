@@ -5,43 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
 
-  <!-- Icons / Manifest (optional but recommended) -->
-  <link rel="apple-touch-icon" href="icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon.png" />
-  <link rel="manifest" href="manifest.json" />
+  <!-- Correct icon/manifest tags (optional, safe to keep) -->
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+  <link rel="manifest" href="manifest.json">
 
   <style>
   :root{
-    --on-color:#3498db;
-    --travel-color:#e67e22;
-    --off-color:#ffffff;
+    --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
+    --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff;
+    --border-color:#eee; --border-strong:#000;
 
-    --text-main:#333;
-    --bg-body:#f0f2f5;
-    --bg-card:#ffffff;
-
-    --border-color:#eee;
-    --border-strong:#000;
-
-    /* Base tint variables; JS updates these from the slider */
+    /* Tint variables (driven by slider in JS) */
     --on-tint-soft: rgba(52,152,219,0.12);
     --travel-tint-soft: rgba(230,126,34,0.14);
     --on-tint-strong: rgba(52,152,219,0.16);
     --travel-tint-strong: rgba(230,126,34,0.18);
 
-    /* Added for Standard & Aurora themes */
+    /* Extra tint stops used by Standard & Aurora themes */
     --on-solid-rgba: rgba(52,152,219,0.75);
     --travel-solid-rgba: rgba(230,126,34,0.75);
     --on-aurora-rgba: rgba(52,152,219,0.85);
     --travel-aurora-rgba: rgba(230,126,34,0.85);
   }
   body.dark-mode{
-    --off-color:#2c3e50;
-    --text-main:#ecf0f1;
-    --bg-body:#1a1a1a;
-    --bg-card:#2d2d2d;
-    --border-color:#444;
-    --border-strong:#e6e6e6;
+    --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d;
+    --border-color:#444; --border-strong:#e6e6e6;
   }
   body{
     font-family:'Segoe UI',system-ui,sans-serif; padding:20px;
@@ -63,11 +52,10 @@
   .dot{ width:12px; height:12px; border-radius:50%; border:2px solid var(--border-strong); }
   #nameInlineWrap{ justify-self:center; }
   .name-chip{
-    display:inline-flex; align-items:center; gap:10px; padding:8px 12px;
-    border-radius:10px;
+    display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px;
     background:linear-gradient(135deg,var(--on-color),var(--travel-color));
-    color:#fff; font-weight:800; letter-spacing:.2px;
-    box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:1.05rem;
+    color:#fff; font-weight:800; letter-spacing:.2px; box-shadow:0 4px 14px rgba(0,0,0,.12);
+    font-size:1.05rem;
   }
   .name-chip .label{ opacity:.9; font-weight:700; font-size:.95rem; }
   .name-chip .value{ font-size:1.1rem; }
@@ -88,7 +76,8 @@
   }
   input[type=range]{ width:180px; }
   .btn{ padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:800; border:none; transition:.2s; font-size:.95rem; }
-  .btn-gen{ background:#2ecc71; color:#fff; } .btn-dark{ background:#34495e; color:#fff; }
+  .btn-gen{ background:#2ecc71; color:#fff; }
+  .btn-dark{ background:#34495e; color:#fff; }
 
   /* Calendar layouts */
   .calendar-grid{ display:grid; gap:22px; --month-min:340px; }
@@ -130,7 +119,7 @@
   .theme-standard .weekday-header { color:#5b6b7c; }
   .theme-standard .day { border-radius:999px; background:#f6f9ff; }
   .theme-standard .off-day { background:#f2f6fb; color:#222; }
-  /* Tint-controlled fills (uses --on-solid-rgba / --travel-solid-rgba) */
+  /* Tint-driven fills */
   .theme-standard .on-shift {
     background: linear-gradient(135deg, var(--on-solid-rgba), var(--on-color)) !important;
     color:#fff; border-color:var(--on-color);
@@ -166,7 +155,6 @@
     mix-blend-mode: overlay;
   }
   .theme-aurora .off-day{ background:#f3f6fb; color:#213042; }
-  /* Tint-controlled aurora gradient first stop (uses --on-aurora-rgba / --travel-aurora-rgba) */
   .theme-aurora .on-shift{
     background: linear-gradient(135deg, var(--on-aurora-rgba), var(--on-color));
     color:#fff; border-color: var(--on-color); text-shadow:0 1px 0 rgba(0,0,0,.25);
@@ -197,11 +185,10 @@
   .theme-poster .month { border:3px solid #111; border-radius:4px; background:#fff; box-shadow:none; }
   .theme-poster h3 { color:#111; text-transform:uppercase; letter-spacing:.08em; border:none; padding:6px 0 10px; }
   .theme-poster .day { border-radius:6px; }
-  /* Tint-controlled fills (use the stronger tints for punch) */
   .theme-poster .on-shift { background: var(--on-tint-strong) !important; color:#111; border-color:#111 !important; }
   .theme-poster .travel-day { background: var(--travel-tint-strong) !important; color:#111; border-color:#111 !important; }
 
-  /* ---- Letter image export (PNG): fill 8.5"x11" content area, readable ---- */
+  /* ---- Letter PNG export preset (fit content area; readable) ---- */
   .png-letter #pageTitle { font-size: 1.3rem !important; }
   .png-letter .legend { padding: 8px 10px !important; gap: 10px !important; font-size: 0.95rem !important; box-shadow: none !important; }
   .png-letter .calendar-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; --month-min: 0 !important; }
@@ -216,8 +203,8 @@
     border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.08);
   }
   .mini-btn{ padding:8px 10px; font-weight:800; border:none; border-radius:6px; background:#e9ecef; color:#222; }
-  .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; }         /* Update */
-  .mini-btn:nth-child(2){ background:#3498db; color:#fff; }         /* Image */
+  .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; } /* Update */
+  .mini-btn:nth-child(2){ background:#3498db; color:#fff; } /* Image */
   .controls-toggle{ display:none; margin:8px 0 10px; padding:10px 12px; font-weight:800; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-main); box-shadow:0 2px 6px rgba(0,0,0,.06); }
 
   @media (max-width:700px){
@@ -233,18 +220,14 @@
   @media print{ @page{ size:auto; margin:0.25in; } }
   </style>
 
-  <!-- html2canvas (used only when you click “Download Image”) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaPDe0FQ3g8Hj2Rkz0Xn5ZVbNw/i6q3kZbNMD0S6t7P2hFZgK6JjCqk0j2a8J8l+6r8pZ2L8zO3mMs4n3Gf1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- ✅ Correct script include (loads the library properly) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
   <div id="calendar-capture-root">
     <div class="header-container">
       <h2 id="pageTitle">North Slope Shift Calendar</h2>
-      <div id="nameInlineWrap">
-        <div id="nameInline" class="name-chip">
-          <span class="label">Name:</span><span class="value" id="nameInlineText"></span>
-        </div>
-      </div>
+      <div id="nameInlineWrap"><div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div></div>
       <div class="legend">
         <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
         <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
@@ -280,7 +263,6 @@
       <div class="control-group"><label for="tintStrength">Tint strength</label>
         <input type="range" id="tintStrength" min="8" max="30" step="1" value="16" oninput="updateColors(); saveSettings();">
       </div>
-
       <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Turd Ferguson" oninput="handleNameInput(); saveSettings()" maxlength="80"></div>
 
       <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
@@ -300,6 +282,7 @@
     </div>
   </div>
 
+  <!-- App script -->
   <script>
   const LS_KEYS = {
     year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start',
@@ -326,15 +309,10 @@
   function loadSettings(){
     try{
       const setIf=(el,key)=>{ const v=localStorage.getItem(key); if(v && el) el.value=v; };
-      setIf(yearSelect,LS_KEYS.year);
-      setIf(daysOn,LS_KEYS.on);
-      setIf(daysOff,LS_KEYS.off);
-      setIf(startDate,LS_KEYS.start);
-      setIf(layoutStyle,LS_KEYS.style);
-      setIf(workColor,LS_KEYS.work);
-      setIf(travelColor,LS_KEYS.travel);
-      setIf(nameField,LS_KEYS.name);
-      setIf(tintStrength,LS_KEYS.tint);
+      setIf(yearSelect,LS_KEYS.year); setIf(daysOn,LS_KEYS.on); setIf(daysOff,LS_KEYS.off);
+      setIf(startDate,LS_KEYS.start); setIf(layoutStyle,LS_KEYS.style);
+      setIf(workColor,LS_KEYS.work);  setIf(travelColor,LS_KEYS.travel);
+      setIf(nameField,LS_KEYS.name);  setIf(tintStrength,LS_KEYS.tint);
       const cap=localStorage.getItem(LS_KEYS.capture); if(cap) captureWidth.value=cap;
       if(localStorage.getItem(LS_KEYS.dark)==='1') document.body.classList.add('dark-mode');
     }catch(e){}
@@ -342,10 +320,8 @@
 
   function __hexToRGBA(hex, alpha) {
     try {
-      const h=(hex ?? '#000').replace('#','');
-      const n=parseInt(h,16);
-      const r=(n>>16)&255, g=(n>>8)&255, b=n&255;
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      const h=(hex ?? '#000').replace('#',''); const n=parseInt(h,16);
+      const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     } catch(e){ return `rgba(0,0,0,${alpha ?? 1})`; }
   }
 
@@ -356,26 +332,25 @@
 
     // Base % from slider (8..30 in UI)
     const basePct = parseInt(tintStrength?.value ?? '16', 10);
-
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-    // Derived intensities for different themes
+    // Derived intensities
     const softOnPct    = clamp(basePct - 4,  5, 40);  // Clean Grid
     const softTrPct    = clamp(basePct - 2,  5, 40);
     const strongOnPct  = clamp(basePct + 0,  5, 40);  // Wall / Poster
     const strongTrPct  = clamp(basePct + 2,  5, 40);
 
-    const solidOnPct   = clamp(basePct + 10, 5, 95);  // Standard (gradient first stop)
+    const solidOnPct   = clamp(basePct + 10, 5, 95);  // Standard (first stop)
     const solidTrPct   = clamp(basePct + 10, 5, 95);
 
-    const auroraOnPct  = clamp(basePct + 35, 55, 95); // Aurora (gradient first stop)
+    const auroraOnPct  = clamp(basePct + 35, 55, 95); // Aurora (first stop)
     const auroraTrPct  = clamp(basePct + 35, 55, 95);
 
-    // Base colors
+    // Base
     document.documentElement.style.setProperty('--on-color', onHex);
     document.documentElement.style.setProperty('--travel-color', trHex);
 
-    // Clean Grid & Wall tints
+    // Clean Grid & Wall
     document.documentElement.style.setProperty('--on-tint-soft',       __hexToRGBA(onHex, softOnPct/100));
     document.documentElement.style.setProperty('--travel-tint-soft',    __hexToRGBA(trHex, softTrPct/100));
     document.documentElement.style.setProperty('--on-tint-strong',     __hexToRGBA(onHex, strongOnPct/100));
@@ -416,19 +391,12 @@
     const DESIGN_WIDTH=1600;
     const ww=w.clientWidth ?? window.innerWidth;
     const s=Math.min(1, ww/ DESIGN_WIDTH);
-    if(Math.abs(s-currentScale)>.005){
-      currentScale=s;
-      w.style.transformOrigin='top center';
-      w.style.transform=`scale(${s})`;
-    }
+    if(Math.abs(s-currentScale)>.005){ currentScale=s; w.style.transformOrigin='top center'; w.style.transform=`scale(${s})`; }
   }
   function initAutoScale(){
     applyAutoScale();
-    if(window.ResizeObserver){
-      (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper);
-    } else {
-      window.addEventListener('resize',applyAutoScale);
-    }
+    if(window.ResizeObserver){ (new ResizeObserver(()=>applyAutoScale())).observe(calendarScaleWrapper); }
+    else { window.addEventListener('resize',applyAutoScale); }
   }
 
   function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); saveSettings(); }
@@ -444,10 +412,7 @@
     const startShift=new Date(startInput+'T00:00:00');
     const today=new Date(); today.setHours(0,0,0,0);
 
-    const container=calendar;
-    container.className='calendar-grid '+layoutClasses;
-    container.innerHTML='';
-
+    const container=calendar; container.className='calendar-grid '+layoutClasses; container.innerHTML='';
     const cycle=dOn+dOff;
 
     for(let m=0;m<12;m++){
@@ -478,38 +443,29 @@
     const liveRoot = document.getElementById('calendar-capture-root');
     const cloneRoot = liveRoot.cloneNode(true);
 
-    // Apply readable preset
+    // Print-friendly preset
     cloneRoot.classList.add('png-letter');
 
-    // Remove UI chrome only; keep title, legend, and name chip
-    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle')
-      .forEach(el => el.remove());
+    // Remove UI only; keep title, legend, and name chip
+    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
 
     // High-contrast name chip for print
     const chip = cloneRoot.querySelector('.name-chip');
-    if (chip) {
-      chip.style.background = 'transparent';
-      chip.style.color = '#000';
-      chip.style.boxShadow = 'none';
-      chip.style.padding = '0';
-    }
+    if (chip) { chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
 
     // Remove autoscale transform; lay out naturally
     const wrap = cloneRoot.querySelector('#calendar-scale-wrapper');
-    if (wrap) {
-      wrap.style.transform = 'none';
-      wrap.style.width = '100%';
-    }
+    if (wrap) { wrap.style.transform='none'; wrap.style.width='100%'; }
 
     // Ensure a 3×4 grid uses full width
     const cal = cloneRoot.querySelector('#calendar');
     if (cal) {
-      cal.style.display = 'grid';
-      cal.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      cal.style.gap = '10px';
-      cal.style.margin = '0 auto';
-      cal.style.width = '100%';
-      cal.style.maxWidth = '100%';
+      cal.style.display='grid';
+      cal.style.gridTemplateColumns='repeat(3, 1fr)';
+      cal.style.gap='10px';
+      cal.style.margin='0 auto';
+      cal.style.width='100%';
+      cal.style.maxWidth='100%';
     }
     return { cloneRoot };
   }
@@ -517,68 +473,56 @@
   /**
    * Download a Letter-sized PNG that fills the printable area.
    * Includes only: Title, Name (if present), Legend, full 12-month calendar.
-   * Print with the same margins (default 0.25") and "Actual size" (100%).
-   *
-   * @param {number} marginIn  Margin in inches (default 0.25" on all sides)
-   * @param {number} dpi       Target DPI (default 300)
+   * Print with same margins (default 0.25") and "Actual size" (100%).
    */
   async function downloadCalendarImage(marginIn = 0.25, dpi = 300) {
     const year = getSelectedYear();
-    const CSS_PPI = 96;            // CSS pixels per inch (browser)
+    const CSS_PPI = 96;                 // CSS pixels per inch
     const PAGE_IN_W = 8.5, PAGE_IN_H = 11;
 
-    // Compute the content box (inside margins) in CSS pixels
+    // Content box (inside margins) in CSS px
     const contentCssW = Math.round((PAGE_IN_W - 2 * marginIn) * CSS_PPI);
     const contentCssH = Math.round((PAGE_IN_H - 2 * marginIn) * CSS_PPI);
 
-    // Prepare a print-friendly clone
     const { cloneRoot } = buildCloneForLetterPNG();
 
-    // Off-screen host sized exactly to the content box
+    // Off-screen host sized to content box
     const fitBox = document.createElement('div');
-    fitBox.style.position = 'fixed';
-    fitBox.style.left = '-99999px';
-    fitBox.style.top = '0';
-    fitBox.style.background = '#fff';
-    fitBox.style.width = contentCssW + 'px';
-    fitBox.style.height = contentCssH + 'px';
-    fitBox.style.overflow = 'hidden';
+    fitBox.style.position='fixed'; fitBox.style.left='-99999px'; fitBox.style.top='0';
+    fitBox.style.background='#fff'; fitBox.style.width=contentCssW+'px'; fitBox.style.height=contentCssH+'px'; fitBox.style.overflow='hidden';
 
     const inner = document.createElement('div');
-    inner.style.transformOrigin = 'top left';
+    inner.style.transformOrigin='top left';
     inner.appendChild(cloneRoot);
     fitBox.appendChild(inner);
     document.body.appendChild(fitBox);
 
-    // Lay out the clone at the target width
-    cloneRoot.style.width = contentCssW + 'px';
-    cloneRoot.style.maxWidth = contentCssW + 'px';
+    // Layout at target width
+    cloneRoot.style.width=contentCssW+'px';
+    cloneRoot.style.maxWidth=contentCssW+'px';
 
     // Wait a frame for layout
     await new Promise(r => requestAnimationFrame(r));
 
-    // Scale to fill height (width already fits)
+    // Scale to fill height
     const naturalH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
     const scale = contentCssH / naturalH;
     inner.style.transform = `scale(${scale})`;
 
-    // Render at DPI (e.g., 300) — multiplies CSS px to raster px for print crispness
+    // Render at DPI (e.g., 300)
     const canvas = await html2canvas(fitBox, {
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      width: contentCssW,
-      height: contentCssH,
-      windowWidth: contentCssW,
-      windowHeight: contentCssH,
-      scrollX: 0,
-      scrollY: 0,
+      backgroundColor:'#ffffff',
+      useCORS:true,
+      width:contentCssW, height:contentCssH,
+      windowWidth:contentCssW, windowHeight:contentCssH,
+      scrollX:0, scrollY:0,
       scale: dpi / CSS_PPI
     });
 
-    // Create a downloadable PNG
-    const link = document.createElement('a');
-    link.download = `Shift-Calendar-${year}-Letter.png`;
-    link.href = canvas.toDataURL('image/png');
+    // Download PNG
+    const link=document.createElement('a');
+    link.download=`Shift-Calendar-${year}-Letter.png`;
+    link.href=canvas.toDataURL('image/png');
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -587,7 +531,7 @@
     document.body.removeChild(fitBox);
   }
 
-  /* ---- Mobile controls accordion ---- */
+  // Controls accordion (mobile)
   function setControlsCollapsed(collapsed){
     const controls=document.querySelector('.controls');
     const toggle=document.getElementById('controlsToggle');
@@ -603,7 +547,7 @@
     }
   }
 
-  /* ---- Init ---- */
+  /* ---- Init (order matters) ---- */
   document.title='North Slope Shift Calendar';
   const yearSelect=document.getElementById('yearSelect');
   const daysOn=document.getElementById('daysOn');
@@ -620,14 +564,13 @@
   const nameInline=document.getElementById('nameInline');
   const nameInlineText=document.getElementById('nameInlineText');
 
-  // Order matters here: load -> apply theme vars -> update name chip -> build calendar -> scale
-  loadSettings();
-  updateColors();
-  updateNameInline();
-  generateCalendar();
-  initAutoScale();
+  loadSettings();       // load saved inputs
+  updateColors();       // apply tint + colors
+  updateNameInline();   // show name chip if present
+  generateCalendar();   // build the year
+  initAutoScale();      // fit to viewport
 
-  // Setup controls toggle state (on phones it may start collapsed)
+  // Setup controls toggle state
   (function(){
     const toggle=document.getElementById('controlsToggle');
     const stored=localStorage.getItem(LS_KEYS.controls);
@@ -653,3 +596,4 @@
   </script>
 </body>
 </html>
+``
