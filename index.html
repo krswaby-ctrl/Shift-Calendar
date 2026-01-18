@@ -233,6 +233,9 @@
 
   @media print{ @page{ size:auto; margin:0.25in; } }
   </style>
+
+  <!-- html2canvas (used only when you click “Download Image”) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
   <div id="calendar-capture-root">
@@ -288,14 +291,3 @@
       <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendarImage()">Download Image</button>
 
       <!-- Hidden input kept for backward compatibility (ignored by image export) -->
-      <input type="hidden" id="captureWidth" value="2200">
-
-      <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
-    </div>
-
-    <div id="calendar-scale-wrapper">
-      <div id="calendar" class="calendar-grid"></div>
-    </div>
-  </div>
-
-  <!-- Library needed for Image export -->
