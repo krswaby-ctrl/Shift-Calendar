@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>North Slope Shift Calendar</title>
 
+  <!-- Icons / PWA (optional) -->
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -30,6 +29,7 @@
     background:var(--bg-body); color:var(--text-main); margin:0;
     transition:background .3s,color .3s;
   }
+
   .header-container{
     display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
     gap:16px; margin-bottom:10px;
@@ -163,22 +163,13 @@
   .theme-poster h3 { color:#111; text-transform:uppercase; letter-spacing:.08em; border:none; padding:6px 0 10px; }
   .theme-poster .day { border-radius:6px; }
 
-  /* Old compact overrides used by the previous export clone */
-  .pdf-mode #pageTitle{ font-size:1.25rem!important; }
-  .pdf-mode .legend{ padding:6px 8px!important; gap:8px!important; font-size:.9rem!important; box-shadow:none!important; }
-  .pdf-mode .calendar-grid{ grid-template-columns:repeat(3,1fr)!important; gap:8px!important; --month-min:240px!important; }
-  .pdf-mode .month{ padding:10px!important; }
-  .pdf-mode h3{ padding-bottom:6px!important; font-size:1.15rem!important; border-width:1px!important; }
-  .pdf-mode .weekday-header{ margin-bottom:6px!important; }
-  .pdf-mode .day{ border-width:1px!important; }
-
-  /* New: PDF fill (Letter page, readable) */
-  .pdf-fill #pageTitle { font-size: 1.3rem !important; }
-  .pdf-fill .legend { padding: 8px 10px !important; gap: 10px !important; font-size: 0.95rem !important; box-shadow: none !important; }
-  .pdf-fill .calendar-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; --month-min: 0 !important; }
-  .pdf-fill .month { padding: 12px !important; }
-  .pdf-fill h3 { padding-bottom: 8px !important; font-size: 1.1rem !important; border-width: 1px !important; }
-  .pdf-fill .weekday-header { margin-bottom: 8px !important; }
+  /* ---- Letter image export (PNG): fill 8.5"x11" content area, readable ---- */
+  .png-letter #pageTitle { font-size: 1.3rem !important; }
+  .png-letter .legend { padding: 8px 10px !important; gap: 10px !important; font-size: 0.95rem !important; box-shadow: none !important; }
+  .png-letter .calendar-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; --month-min: 0 !important; }
+  .png-letter .month { padding: 12px !important; }
+  .png-letter h3 { padding-bottom: 8px !important; font-size: 1.1rem !important; border-width: 1px !important; }
+  .png-letter .weekday-header { margin-bottom: 8px !important; }
 
   /* Mobile toolbar + controls toggle */
   .mini-toolbar{
@@ -187,9 +178,8 @@
     border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.08);
   }
   .mini-btn{ padding:8px 10px; font-weight:800; border:none; border-radius:6px; background:#e9ecef; color:#222; }
-  .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; }
-  .mini-btn:nth-child(2){ background:#2d6cdf; color:#fff; }
-  .mini-btn:nth-child(3){ background:#3498db; color:#fff; }
+  .mini-btn:nth-child(1){ background:#2ecc71; color:#fff; }         /* Update */
+  .mini-btn:nth-child(2){ background:#3498db; color:#fff; }         /* Image */
   .controls-toggle{ display:none; margin:8px 0 10px; padding:10px 12px; font-weight:800; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-main); box-shadow:0 2px 6px rgba(0,0,0,.06); }
 
   @media (max-width:700px){
@@ -220,7 +210,6 @@
     <!-- Mobile quick actions -->
     <div class="mini-toolbar" role="toolbar" aria-label="Quick actions">
       <button type="button" class="mini-btn" onclick="generateCalendar()">Update</button>
-      <button type="button" class="mini-btn" onclick="downloadCalendarPDF()">PDF</button>
       <button type="button" class="mini-btn" onclick="downloadCalendarImage()">Image</button>
     </div>
 
@@ -252,14 +241,10 @@
       <button type="button" class="btn btn-gen" onclick="generateCalendar()">Update</button>
       <button type="button" class="btn btn-dark" onclick="toggleDarkMode()">Dark Mode</button>
 
-      <!-- PDF buttons (single-page default, two-page larger) -->
-      <button type="button" class="btn" style="background:#2d6cdf;color:#fff;" onclick="downloadCalendarPDF()">Download PDF</button>
-      <button type="button" class="btn" style="background:#1f8b4c;color:#fff;" onclick="downloadCalendarPDFTwoPages()">PDF (2 pages, larger)</button>
-
-      <!-- Image button (WYSIWYG) -->
+      <!-- Image button (now: Letter-sized high-res PNG) -->
       <button type="button" class="btn" style="background:#3498db;color:#fff;" onclick="downloadCalendarImage()">Download Image</button>
 
-      <!-- Kept for backward compatibility (not used by image export anymore) -->
+      <!-- Hidden input kept for backward compatibility (ignored by image export) -->
       <input type="hidden" id="captureWidth" value="2200">
 
       <button type="button" class="btn" style="background:#e74c3c;color:#fff;" onclick="resetSettings()">Reset Defaults</button>
@@ -270,9 +255,8 @@
     </div>
   </div>
 
-  <!-- libs -->
+  <!-- Library needed for Image export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
   const LS_KEYS = { year:'sc_year', on:'sc_daysOn', off:'sc_daysOff', start:'sc_start', style:'sc_style', work:'sc_workColor', travel:'sc_travelColor', dark:'sc_darkMode', name:'sc_name', tint:'sc_tint', capture:'sc_capture', controls:'sc_controls_collapsed' };
@@ -398,208 +382,121 @@
     requestAnimationFrame(applyAutoScale);
   }
 
-  // ---------- New: WYSIWYG Image Export ----------
-  function _hideForCapture(elements){
-    const changed=[];
-    elements.forEach(el=>{ if(!el) return; changed.push([el, el.style.display]); el.style.display='none'; });
-    return ()=>changed.forEach(([el,prev])=>{ el.style.display = prev || ''; });
-  }
-  async function downloadCalendarImage(){
-    const year=getSelectedYear();
-    const root=document.getElementById('calendar-capture-root');
-    if(!root) return;
-    const restore=_hideForCapture([
-      root.querySelector('.controls'),
-      root.querySelector('.mini-toolbar'),
-      root.querySelector('.controls-toggle')
-    ]);
-    try{
-      const dpr=Math.min(3, window.devicePixelRatio || 1);
-      const bg=getComputedStyle(document.body).backgroundColor || '#ffffff';
-      const canvas=await html2canvas(root,{ backgroundColor:bg, useCORS:true, scale:dpr, logging:false });
-      const link=document.createElement('a'); link.download=`Shift-Calendar-${year}.png`; link.href=canvas.toDataURL('image/png');
-      document.body.appendChild(link); link.click(); link.remove();
-    }catch(err){
-      console.error('PNG export failed:',err);
-      alert('Sorry, generating the image failed.');
-    }finally{
-      restore();
-    }
-  }
+  /* ---------- Letter-sized PNG export (8.5"x11" content area @300 DPI) ---------- */
+  function buildCloneForLetterPNG() {
+    const liveRoot = document.getElementById('calendar-capture-root');
+    const cloneRoot = liveRoot.cloneNode(true);
 
-  // ---------- New: PDF clone (readable + page-filling) ----------
-  function buildCloneForPDF(){
-    const liveRoot=document.getElementById('calendar-capture-root');
-    const cloneRoot=liveRoot.cloneNode(true);
-    cloneRoot.classList.add('pdf-fill');
+    // Apply readable preset
+    cloneRoot.classList.add('png-letter');
 
     // Remove UI chrome only; keep title, legend, and name chip
-    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
+    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle')
+      .forEach(el => el.remove());
 
     // High-contrast name chip for print
-    const chip=cloneRoot.querySelector('.name-chip');
-    if(chip){ chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
+    const chip = cloneRoot.querySelector('.name-chip');
+    if (chip) {
+      chip.style.background = 'transparent';
+      chip.style.color = '#000';
+      chip.style.boxShadow = 'none';
+      chip.style.padding = '0';
+    }
 
-    // Remove autoscale transform and lay out naturally
-    const wrap=cloneRoot.querySelector('#calendar-scale-wrapper');
-    if(wrap){ wrap.style.transform='none'; wrap.style.width='100%'; }
+    // Remove autoscale transform; lay out naturally
+    const wrap = cloneRoot.querySelector('#calendar-scale-wrapper');
+    if (wrap) {
+      wrap.style.transform = 'none';
+      wrap.style.width = '100%';
+    }
 
-    // Ensure 3×4 grid uses full width
-    const cal=cloneRoot.querySelector('#calendar');
-    if(cal){
-      cal.style.display='grid';
-      cal.style.gridTemplateColumns='repeat(3, 1fr)';
-      cal.style.gap='10px';
-      cal.style.margin='0 auto';
-      cal.style.width='100%';
-      cal.style.maxWidth='100%';
+    // Ensure a 3×4 grid uses full width
+    const cal = cloneRoot.querySelector('#calendar');
+    if (cal) {
+      cal.style.display = 'grid';
+      cal.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      cal.style.gap = '10px';
+      cal.style.margin = '0 auto';
+      cal.style.width = '100%';
+      cal.style.maxWidth = '100%';
     }
     return { cloneRoot };
   }
 
-  // ---------- New: Single-page Letter PDF (default) ----------
-  async function downloadCalendarPDF(){
-    const { jsPDF } = window.jspdf || {};
-    if(!jsPDF){ alert('PDF library is still loading.'); return; }
+  /**
+   * Download a Letter-sized PNG that fills the printable area.
+   * Keeps only: Title, Name chip (if present), Legend, 12-month calendar.
+   * Prints best with the same margins (default 0.25") and "Actual size" (100%).
+   *
+   * @param {number} marginIn  Margin in inches (default 0.25" on all sides)
+   * @param {number} dpi       Target DPI (default 300)
+   */
+  async function downloadCalendarImage(marginIn = 0.25, dpi = 300) {
+    const year = getSelectedYear();
+    const CSS_PPI = 96;            // CSS pixels per inch (browser)
+    const PAGE_IN_W = 8.5, PAGE_IN_H = 11;
 
-    const year=getSelectedYear();
-    const CSS_PPI=96, TARGET_DPI=300;
-    const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;
+    // Compute the content box (inside margins) in CSS pixels
+    const contentCssW = Math.round((PAGE_IN_W - 2 * marginIn) * CSS_PPI);
+    const contentCssH = Math.round((PAGE_IN_H - 2 * marginIn) * CSS_PPI);
 
-    const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI);
-    const contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI);
+    // Prepare a print-friendly clone
+    const { cloneRoot } = buildCloneForLetterPNG();
 
-    const { cloneRoot }=buildCloneForPDF();
+    // Off-screen host sized exactly to the content box
+    const fitBox = document.createElement('div');
+    fitBox.style.position = 'fixed';
+    fitBox.style.left = '-99999px';
+    fitBox.style.top = '0';
+    fitBox.style.background = '#fff';
+    fitBox.style.width = contentCssW + 'px';
+    fitBox.style.height = contentCssH + 'px';
+    fitBox.style.overflow = 'hidden';
 
-    // Off-screen host sized to printable area
-    const fitBox=document.createElement('div');
-    fitBox.style.position='fixed';
-    fitBox.style.left='-99999px';
-    fitBox.style.top='0';
-    fitBox.style.background='#fff';
-    fitBox.style.width=contentCssW+'px';
-    fitBox.style.height=contentCssH+'px';
-    fitBox.style.overflow='hidden';
-
-    const inner=document.createElement('div');
-    inner.style.transformOrigin='top left';
+    const inner = document.createElement('div');
+    inner.style.transformOrigin = 'top left';
     inner.appendChild(cloneRoot);
     fitBox.appendChild(inner);
     document.body.appendChild(fitBox);
 
-    cloneRoot.style.width=contentCssW+'px';
-    cloneRoot.style.maxWidth=contentCssW+'px';
+    // Lay out the clone at the target width
+    cloneRoot.style.width = contentCssW + 'px';
+    cloneRoot.style.maxWidth = contentCssW + 'px';
 
-    await new Promise(r=>requestAnimationFrame(r));
+    // Wait a frame for layout
+    await new Promise(r => requestAnimationFrame(r));
 
     // Scale to fill height (width already fits)
-    const naturalH=Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
-    const scale=contentCssH / naturalH;
-    inner.style.transform=`scale(${scale})`;
+    const naturalH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
+    const scale = contentCssH / naturalH;
+    inner.style.transform = `scale(${scale})`;
 
-    // Render at 300 DPI
-    const canvas=await html2canvas(fitBox,{
-      backgroundColor:'#ffffff',
-      useCORS:true,
-      width:contentCssW,
-      height:contentCssH,
-      windowWidth:contentCssW,
-      windowHeight:contentCssH,
-      scrollX:0, scrollY:0,
-      scale: TARGET_DPI / CSS_PPI
+    // Render at DPI (e.g., 300) — multiplies CSS px to raster px for print crispness
+    const canvas = await html2canvas(fitBox, {
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      width: contentCssW,
+      height: contentCssH,
+      windowWidth: contentCssW,
+      windowHeight: contentCssH,
+      scrollX: 0,
+      scrollY: 0,
+      scale: dpi / CSS_PPI
     });
 
-    // Compose PDF
-    const pageW=612, pageH=792; // pt
-    const marginPt=72*MARGIN_IN;
-    const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false});
-    if(typeof pdf.setCompression==='function') pdf.setCompression(false);
+    // Create a downloadable PNG
+    const link = document.createElement('a');
+    link.download = `Shift-Calendar-${year}-Letter.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 
-    pdf.addImage(canvas.toDataURL('image/png'),'PNG',
-                 marginPt, marginPt,
-                 pageW-2*marginPt, pageH-2*marginPt);
-
-    pdf.save(`Shift-Calendar-${year}.pdf`);
+    // Cleanup
     document.body.removeChild(fitBox);
   }
 
-  // ---------- New: Two-page Letter PDF (larger text) ----------
-  async function downloadCalendarPDFTwoPages(){
-    const { jsPDF } = window.jspdf || {};
-    if(!jsPDF){ alert('PDF library is still loading.'); return; }
-
-    const year=getSelectedYear();
-    const CSS_PPI=96, TARGET_DPI=300;
-    const PAGE_IN_W=8.5, PAGE_IN_H=11, MARGIN_IN=0.25;
-
-    const contentCssW=Math.round((PAGE_IN_W-2*MARGIN_IN)*CSS_PPI);
-    const contentCssH=Math.round((PAGE_IN_H-2*MARGIN_IN)*CSS_PPI);
-
-    const { cloneRoot }=buildCloneForPDF();
-
-    // Off-screen tall host; we'll slice it into pages
-    const host=document.createElement('div');
-    host.style.position='fixed';
-    host.style.left='-99999px';
-    host.style.top='0';
-    host.style.background='#fff';
-    host.style.width=contentCssW+'px';
-    host.style.overflow='visible';
-    document.body.appendChild(host);
-
-    cloneRoot.style.width=contentCssW+'px';
-    cloneRoot.style.maxWidth=contentCssW+'px';
-    host.appendChild(cloneRoot);
-
-    await new Promise(r=>requestAnimationFrame(r));
-
-    const naturalH=Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
-
-    const fullCanvas=await html2canvas(host,{
-      backgroundColor:'#ffffff',
-      useCORS:true,
-      width:contentCssW,
-      height:naturalH,
-      windowWidth:contentCssW,
-      windowHeight:naturalH,
-      scrollX:0, scrollY:0,
-      scale: TARGET_DPI / CSS_PPI
-    });
-
-    document.body.removeChild(host);
-
-    // Slice into page chunks
-    const pagePxH=Math.round(contentCssH * (TARGET_DPI / CSS_PPI));
-    const totalPxH=fullCanvas.height;
-
-    const pageWpt=612, pageHpt=792;
-    const marginPt=72*MARGIN_IN;
-    const drawWpt=pageWpt-2*marginPt, drawHpt=pageHpt-2*marginPt;
-
-    const pdf=new jsPDF({orientation:'p', unit:'pt', format:'letter', compress:false});
-    if(typeof pdf.setCompression==='function') pdf.setCompression(false);
-
-    let y=0, pageIndex=0;
-    while(y < totalPxH){
-      const sliceH=Math.min(pagePxH, totalPxH - y);
-      const pageCanvas=document.createElement('canvas');
-      pageCanvas.width=fullCanvas.width;
-      pageCanvas.height=sliceH;
-      const ctx=pageCanvas.getContext('2d');
-      ctx.drawImage(fullCanvas, 0, y, fullCanvas.width, sliceH, 0, 0, fullCanvas.width, sliceH);
-
-      if(pageIndex>0) pdf.addPage('letter','p');
-      pdf.addImage(pageCanvas.toDataURL('image/png'),'PNG',
-                   marginPt, marginPt,
-                   drawWpt, drawHpt);
-
-      y += sliceH;
-      pageIndex++;
-    }
-    pdf.save(`Shift-Calendar-${year}-2pg.pdf`);
-  }
-
-  // Controls accordion (mobile)
+  /* ---------- Mobile controls accordion ---------- */
   function setControlsCollapsed(collapsed){
     const controls=document.querySelector('.controls');
     const toggle=document.getElementById('controlsToggle');
@@ -615,7 +512,7 @@
     }
   }
 
-  // Init references
+  /* ---------- Init ---------- */
   document.title='North Slope Shift Calendar';
   const yearSelect=document.getElementById('yearSelect');
   const daysOn=document.getElementById('daysOn');
