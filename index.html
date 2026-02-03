@@ -14,208 +14,151 @@
     --on-color:#3498db; --travel-color:#e67e22; --off-color:#ffffff;
     --text-main:#333; --bg-body:#f0f2f5; --bg-card:#ffffff;
     --border-color:#eee; --border-strong:#000;
-
-    /* Dynamic Tint Variables */
-    --on-tint-soft: rgba(52,152,219,0.12);
-    --travel-tint-soft: rgba(230,126,34,0.14);
-    --on-tint-strong: rgba(52,152,219,0.16);
-    --travel-tint-strong: rgba(230,126,34,0.18);
-    --on-solid-rgba: rgba(52,152,219,0.75);
-    --travel-solid-rgba: rgba(230,126,34,0.75);
-    --on-aurora-rgba: rgba(52,152,219,0.85);
-    --travel-aurora-rgba: rgba(230,126,34,0.85);
+    --on-tint: rgba(52,152,219,0.16);
+    --travel-tint: rgba(230,126,34,0.18);
   }
   body.dark-mode{
     --off-color:#2c3e50; --text-main:#ecf0f1; --bg-body:#1a1a1a; --bg-card:#2d2d2d;
     --border-color:#444; --border-strong:#e6e6e6;
   }
-  body{
-    font-family:'Segoe UI',system-ui,sans-serif; padding:20px;
-    background:var(--bg-body); color:var(--text-main); margin:0;
-    transition:background .3s,color .3s;
-  }
+  body{ font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg-body); color:var(--text-main); margin:0; padding:20px; transition: background 0.3s; }
 
-  /* Header & Legend */
-  .header-container{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; margin-bottom:10px; }
-  #pageTitle{ justify-self:start; margin:0; font-size:1.5rem; font-weight:800; }
-  .legend{ justify-self:end; display:flex; gap:15px; background:var(--bg-card); padding:10px 15px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); font-size:1rem; font-weight:700; }
-  .legend-item{ display:flex; align-items:center; gap:6px; }
-  .dot{ width:12px; height:12px; border-radius:50%; border:2px solid var(--border-strong); }
-  .name-chip{ display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px; background:linear-gradient(135deg,var(--on-color),var(--travel-color)); color:#fff; font-weight:800; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+  .header-container{ display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+  .controls{ background:var(--bg-card); padding:15px; border-radius:12px; display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px; align-items: end; }
+  .control-group{ display:flex; flex-direction:column; gap:2px; font-size:12px; font-weight:bold; }
+  input, select, .btn { padding:8px; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-card); color:var(--text-main); }
+  input[type="color"] { padding:0; height:38px; cursor:pointer; }
+  .btn-print { background:#3498db; color:white; font-weight:800; cursor:pointer; border:none; }
 
-  /* Controls */
-  .controls{ background:var(--bg-card); padding:14px; border-radius:12px; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.1); display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); align-items:end; }
-  .control-group{ display:flex; flex-direction:column; gap:2px; }
-  label{ font-weight:700; font-size:.85em; opacity:.9; }
-  input, select{ padding:6px 8px; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-card); color:var(--text-main); font-size:.95rem; }
-  input[type=color]{ padding:0; height:38px; cursor:pointer; width:100%; }
-
-  /* Calendar Grids */
-  .calendar-grid{ display:grid; gap:20px; width:100%; margin-top:10px; }
-  .layout-standard, .layout-compact, .layout-poster, .layout-grid, .layout-wall {
-     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  }
-
-  .month{ background:var(--bg-card); border-radius:10px; padding:18px; border:2px solid var(--border-strong); box-shadow:0 2px 6px rgba(0,0,0,.1); }
-  h3{ text-align:center; color:var(--on-color); border-bottom:2px solid var(--border-strong); padding-bottom:10px; margin:0 0 10px 0; font-size:1.25rem; font-weight:800; }
+  /* Calendar Grid Base */
+  .calendar-grid{ display:grid; gap:20px; width:100%; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .month{ background:var(--bg-card); padding:18px; border-radius:10px; transition: transform 0.2s; }
+  h3{ text-align:center; color:var(--on-color); margin-top:0; border-bottom: 2px solid var(--border-strong); padding-bottom: 8px; }
   .weekday-header, .days{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; }
-  .weekday-header{ font-weight:800; color:#666; font-size:.95em; margin-bottom:10px; }
-  .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px; border:2px solid var(--border-strong); font-weight:700; }
-  .on-shift, .travel-day{ color:#fff; }
-  .off-day{ background:var(--off-color); }
-  .empty{ visibility:hidden; }
+  .weekday-header{ font-weight:800; opacity:0.6; margin-bottom:10px; font-size:0.85em; }
+  .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-weight:700; border: 1px solid transparent; }
 
-  /* Style Logic */
-  .theme-clean-grid .day { border-radius:0; }
-  .theme-clean-grid .on-shift { background: var(--on-tint-soft) !important; color:var(--text-main); }
-  .theme-clean-grid .travel-day { background: var(--travel-tint-soft) !important; color:var(--text-main); }
-  
-  .theme-wall .day { border-radius:0; justify-content:flex-end; align-items:flex-start; padding:4px; }
-  .theme-wall .on-shift { background: var(--on-tint-strong) !important; color:var(--text-main); }
-  .theme-wall .travel-day { background: var(--travel-tint-strong) !important; color:var(--text-main); }
+  /* --- RESTORED 5 STYLES --- */
 
-  /* 8.5x11 Print Logic */
+  /* 1. Classic Cards (Rounded, Shadowed) */
+  .layout-standard .month { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  .layout-standard .day { border-radius: 50%; margin: 2px; }
+  .layout-standard .on-shift { background: var(--on-color); color: white; }
+  .layout-standard .travel-day { background: var(--travel-color); color: white; }
+
+  /* 2. Clean Grid (Flat, No Shadows) */
+  .layout-grid .month { border: 1px solid var(--border-strong); border-radius: 0; }
+  .layout-grid .day { border: 1px solid var(--border-color); border-radius: 0; }
+  .layout-grid .on-shift { background: var(--on-tint) !important; color: var(--text-main); }
+  .layout-grid .travel-day { background: var(--travel-tint) !important; color: var(--text-main); }
+
+  /* 3. Wall Calendar (Large Boxes, Numbers in Corner) */
+  .layout-wall .month { border: 2px solid var(--border-strong); border-radius: 0; }
+  .layout-wall .day { border: 1px solid var(--border-color); border-radius: 0; justify-content: flex-end; align-items: flex-start; padding: 4px; font-size: 0.9em; }
+  .layout-wall .on-shift { background: var(--on-tint) !important; color: var(--text-main); border: 1px solid var(--on-color); }
+  .layout-wall .travel-day { background: var(--travel-tint) !important; color: var(--text-main); border: 1px solid var(--travel-color); }
+
+  /* 4. Poster View (High Contrast, Large Headers) */
+  .layout-poster .month { border: 6px solid var(--on-color); }
+  .layout-poster h3 { background: var(--on-color); color: white; padding: 10px; }
+  .layout-poster .day { font-size: 1.2em; font-weight: 900; }
+
+  /* 5. Compact (Tight spacing for Mobile) */
+  .layout-compact .calendar-grid { gap: 10px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .layout-compact .day { aspect-ratio: 1.4; font-size: 0.8em; }
+
+  /* Print Fixes for 8.5x11 */
   @media print {
-    @page { size: letter; margin: 0.4in; }
-    body { background: #fff !important; color: #000 !important; padding: 0 !important; }
-    .controls, .mini-toolbar, #controlsToggle, .btn { display: none !important; }
-    #calendar-scale-wrapper { transform: none !important; width: 100% !important; }
-    .calendar-grid { 
-      grid-template-columns: repeat(3, 1fr) !important; 
-      gap: 10px !important; 
-      width: 100% !important;
-    }
-    .month { page-break-inside: avoid; border-width: 1px !important; padding: 10px !important; }
-    h3 { font-size: 1.1rem !important; padding-bottom: 5px !important; }
-    .day { border-width: 1px !important; }
+    @page { size: letter; margin: 0.5in; }
+    .controls, .btn-print { display: none !important; }
+    .calendar-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+    .month { page-break-inside: avoid; border: 1px solid #000 !important; }
   }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
-  <div id="calendar-capture-root">
-    <div class="header-container">
-      <h2 id="pageTitle">North Slope Shift Calendar</h2>
-      <div id="nameInlineWrap"><div id="nameInline" class="name-chip"><span class="label">Name:</span><span class="value" id="nameInlineText"></span></div></div>
-      <div class="legend">
-        <div class="legend-item"><div class="dot" style="background:var(--on-color);"></div> Work</div>
-        <div class="legend-item"><div class="dot" style="background:var(--travel-color);"></div> Travel</div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="control-group"><label>Year</label><input type="number" id="yearSelect" value="2026" oninput="handleYearChange()"></div>
-      <div class="control-group"><label>Days ON</label><input type="number" id="daysOn" value="21"></div>
-      <div class="control-group"><label>Days OFF</label><input type="number" id="daysOff" value="21"></div>
-      <div class="control-group"><label>1st Day ON</label><input type="date" id="startDate" value="2026-01-08"></div>
-      <div class="control-group">
-        <label>Style</label>
-        <select id="layoutStyle" onchange="generateCalendar()">
-          <option value="layout-wall theme-wall">Wall Calendar</option>
-          <option value="layout-grid theme-clean-grid">Clean Grid</option>
-          <option value="layout-standard theme-standard">Classic Cards</option>
-        </select>
-      </div>
-      <div class="control-group"><label>Work Color</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()"></div>
-      <div class="control-group"><label>Travel Color</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors()"></div>
-      <div class="control-group"><label>Font Color</label><input type="color" id="fontColor" value="#333333" oninput="updateColors()"></div>
-      <div class="control-group"><label>Tint Strength (%)</label><input type="range" id="tintStrength" min="0" max="100" value="16" oninput="updateColors()"></div>
-      
-      <button class="btn btn-gen" onclick="generateCalendar()">Update</button>
-      <button class="btn" style="background:#3498db;color:#fff;" onclick="window.print()">Print PDF</button>
-    </div>
-
-    <div id="calendar-scale-wrapper">
-      <div id="calendar" class="calendar-grid"></div>
-    </div>
+  <div class="header-container">
+    <h2 id="pageTitle">North Slope Shift Calendar</h2>
+    <button class="btn btn-print" onclick="window.print()">Print PDF</button>
   </div>
 
+  <div class="controls">
+    <div class="control-group"><label>Year</label><input type="number" id="yearSelect" value="2026" oninput="generateCalendar()"></div>
+    <div class="control-group"><label>Days ON</label><input type="number" id="daysOn" value="21" oninput="generateCalendar()"></div>
+    <div class="control-group"><label>Days OFF</label><input type="number" id="daysOff" value="21" oninput="generateCalendar()"></div>
+    <div class="control-group"><label>1st Day ON</label><input type="date" id="startDate" value="2026-01-08" oninput="generateCalendar()"></div>
+    <div class="control-group">
+      <label>Layout Style</label>
+      <select id="layoutStyle" onchange="generateCalendar()">
+        <option value="layout-standard">Classic Cards</option>
+        <option value="layout-grid">Clean Grid</option>
+        <option value="layout-wall">Wall Calendar</option>
+        <option value="layout-poster">Poster View</option>
+        <option value="layout-compact">Compact</option>
+      </select>
+    </div>
+    <div class="control-group"><label>Work Color</label><input type="color" id="workColor" value="#3498db" oninput="updateColors()"></div>
+    <div class="control-group"><label>Font Color</label><input type="color" id="fontColor" value="#333333" oninput="updateColors()"></div>
+    <div class="control-group"><label>Tint Strength %</label><input type="range" id="tintRange" min="0" max="100" value="16" oninput="updateColors()"></div>
+  </div>
+
+  <div id="calendar" class="calendar-grid layout-standard"></div>
+
   <script>
-  const LS_KEYS = { year:'sc_y', on:'sc_on', off:'sc_off', start:'sc_s', style:'sc_st', work:'sc_w', travel:'sc_t', font:'sc_f', tint:'sc_ti' };
+    function updateColors() {
+      const root = document.documentElement;
+      const onHex = document.getElementById('workColor').value;
+      const trHex = "#e67e22"; // Static travel for now, matches your root
+      const fontHex = document.getElementById('fontColor').value;
+      const tint = document.getElementById('tintRange').value / 100;
 
-  function updateColors(){
-    const onHex = workColor.value;
-    const trHex = travelColor.value;
-    const ftHex = fontColor.value;
-    const tint = parseInt(tintStrength.value);
-
-    document.documentElement.style.setProperty('--on-color', onHex);
-    document.documentElement.style.setProperty('--travel-color', trHex);
-    document.documentElement.style.setProperty('--text-main', ftHex);
-
-    const alpha = (tint / 100).toFixed(2);
-    const alphaSoft = (tint / 150).toFixed(2); 
-
-    document.documentElement.style.setProperty('--on-tint-soft', hexToRGBA(onHex, alphaSoft));
-    document.documentElement.style.setProperty('--travel-tint-soft', hexToRGBA(trHex, alphaSoft));
-    document.documentElement.style.setProperty('--on-tint-strong', hexToRGBA(onHex, alpha));
-    document.documentElement.style.setProperty('--travel-tint-strong', hexToRGBA(trHex, alpha));
-    
-    saveSettings();
-  }
-
-  function hexToRGBA(hex, a) {
-    const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
-    return `rgba(${r},${g},${b},${a})`;
-  }
-
-  function generateCalendar(){
-    const dOn = parseInt(daysOn.value); const dOff = parseInt(daysOff.value);
-    const start = new Date(startDate.value + 'T00:00:00');
-    const year = parseInt(yearSelect.value);
-    const container = document.getElementById('calendar');
-    container.className = 'calendar-grid ' + layoutStyle.value;
-    container.innerHTML = '';
-
-    for(let m=0; m<12; m++){
-      const monthDiv = document.createElement('div'); monthDiv.className='month';
-      const first = new Date(year, m, 1);
-      let html = `<h3>${first.toLocaleString('default',{month:'long'})}</h3><div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
-      
-      for(let i=0; i<first.getDay(); i++) html += '<div class="day empty"></div>';
-      
-      const date = new Date(year, m, 1);
-      while(date.getMonth() === m){
-        const diff = Math.round((date - start) / 86400000);
-        let pos = diff % (dOn + dOff); if(pos < 0) pos += (dOn + dOff);
-        const type = (pos === 0 || pos === dOn) ? 'travel-day' : (pos > 0 && pos < dOn) ? 'on-shift' : 'off-day';
-        html += `<div class="day ${type}">${date.getDate()}</div>`;
-        date.setDate(date.getDate() + 1);
-      }
-      monthDiv.innerHTML = html + '</div>';
-      container.appendChild(monthDiv);
+      root.style.setProperty('--on-color', onHex);
+      root.style.setProperty('--text-main', fontHex);
+      root.style.setProperty('--on-tint', hexToRGBA(onHex, tint));
+      root.style.setProperty('--travel-tint', hexToRGBA(trHex, tint + 0.02));
+      generateCalendar();
     }
-  }
 
-  function handleYearChange() { generateCalendar(); }
+    function hexToRGBA(hex, alpha) {
+      const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
 
-  function saveSettings(){
-    localStorage.setItem(LS_KEYS.year, yearSelect.value);
-    localStorage.setItem(LS_KEYS.on, daysOn.value);
-    localStorage.setItem(LS_KEYS.off, daysOff.value);
-    localStorage.setItem(LS_KEYS.start, startDate.value);
-    localStorage.setItem(LS_KEYS.style, layoutStyle.value);
-    localStorage.setItem(LS_KEYS.work, workColor.value);
-    localStorage.setItem(LS_KEYS.travel, travelColor.value);
-    localStorage.setItem(LS_KEYS.font, fontColor.value);
-    localStorage.setItem(LS_KEYS.tint, tintStrength.value);
-  }
+    function generateCalendar() {
+      const container = document.getElementById('calendar');
+      const style = document.getElementById('layoutStyle').value;
+      container.className = 'calendar-grid ' + style;
+      container.innerHTML = '';
 
-  function loadSettings(){
-    if(localStorage.getItem(LS_KEYS.year)) yearSelect.value = localStorage.getItem(LS_KEYS.year);
-    if(localStorage.getItem(LS_KEYS.on)) daysOn.value = localStorage.getItem(LS_KEYS.on);
-    if(localStorage.getItem(LS_KEYS.off)) daysOff.value = localStorage.getItem(LS_KEYS.off);
-    if(localStorage.getItem(LS_KEYS.start)) startDate.value = localStorage.getItem(LS_KEYS.start);
-    if(localStorage.getItem(LS_KEYS.style)) layoutStyle.value = localStorage.getItem(LS_KEYS.style);
-    if(localStorage.getItem(LS_KEYS.work)) workColor.value = localStorage.getItem(LS_KEYS.work);
-    if(localStorage.getItem(LS_KEYS.travel)) travelColor.value = localStorage.getItem(LS_KEYS.travel);
-    if(localStorage.getItem(LS_KEYS.font)) fontColor.value = localStorage.getItem(LS_KEYS.font);
-    if(localStorage.getItem(LS_KEYS.tint)) tintStrength.value = localStorage.getItem(LS_KEYS.tint);
-  }
+      const year = parseInt(document.getElementById('yearSelect').value);
+      const dOn = parseInt(document.getElementById('daysOn').value);
+      const dOff = parseInt(document.getElementById('daysOff').value);
+      const start = new Date(document.getElementById('startDate').value + 'T00:00:00');
 
-  loadSettings();
-  generateCalendar();
-  updateColors();
+      for (let m = 0; m < 12; m++) {
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'month';
+        const firstDay = new Date(year, m, 1);
+        let html = `<h3>${firstDay.toLocaleString('default', { month: 'long' })}</h3>`;
+        html += `<div class="weekday-header"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div><div class="days">`;
+
+        for (let i = 0; i < firstDay.getDay(); i++) html += `<div class="day empty"></div>`;
+
+        let date = new Date(year, m, 1);
+        while (date.getMonth() === m) {
+          const diff = Math.round((date - start) / 86400000);
+          let pos = diff % (dOn + dOff);
+          if (pos < 0) pos += (dOn + dOff);
+          
+          const type = (pos === 0 || pos === dOn) ? 'travel-day' : (pos > 0 && pos < dOn) ? 'on-shift' : 'off-day';
+          html += `<div class="day ${type}">${date.getDate()}</div>`;
+          date.setDate(date.getDate() + 1);
+        }
+        monthDiv.innerHTML = html + '</div>';
+        container.appendChild(monthDiv);
+      }
+    }
+    generateCalendar();
   </script>
 </body>
 </html>
