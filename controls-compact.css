@@ -1,54 +1,9 @@
-/* === Compact Controls: optimized for dynamic themes & printing === */
-.controls { 
-  padding: 14px; 
-  gap: 10px; 
-  row-gap: 10px; 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-  align-items: end; 
-}
-
-.control-group { display: flex; flex-direction: column; gap: 2px; }
-
-.controls label { font-size: .82em; opacity: .85; font-weight: 700; }
-
-.controls input, .controls select { 
-  padding: 6px 8px; 
-  font-size: .9rem; 
-  border-radius: 5px; 
-  width: 100%; 
-  max-width: 170px; 
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-}
-
-/* Specific styling for the color pickers including the new Font Color */
-.controls input[type="color"] {
-  padding: 0;
-  height: 38px;
-  cursor: pointer;
-}
-
-.controls input[type="range"] { width: 100%; max-width: 180px; cursor: pointer; }
-
-.controls .btn { 
-  padding: 8px 12px; 
-  font-size: .9rem; 
-  border-radius: 6px; 
-  width: 100%; 
-  font-weight: 800;
-  cursor: pointer;
-}
-
-/* Responsive Tweaks */
-@media (min-width: 780px) {
-  .controls { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-  .controls .btn { width: auto; }
-}
-
-@media (max-width: 450px) {
-  .controls input, .controls select { width: 100%; max-width: 100%; }
-  .controls input[type="range"] { max-width: 100%; }
-  .controls .btn { padding: 9px 12px; }
-}
+/* === Compact Controls: smaller inputs/buttons, tighter layout === */
+.controls{ padding:14px; gap:10px; row-gap:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); align-items:end; }
+.control-group{ gap:2px; }
+.controls label{ font-size:.82em; opacity:.85; }
+.controls input, .controls select{ padding:6px 8px; font-size:.9rem; border-radius:5px; width:170px; max-width:42vw; }
+.controls input[type=range]{ width:180px; }
+.controls .btn{ padding:8px 12px; font-size:.9rem; border-radius:6px; width:100%; }
+@media (min-width:780px){ .controls{ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } .controls .btn{ width:auto; } }
+@media (max-width:450px){ .controls input, .controls select{ width:150px; } .controls input[type=range]{ width:160px; } .controls .btn{ padding:9px 12px; } }
