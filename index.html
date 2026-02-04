@@ -189,20 +189,28 @@
   .theme-poster .travel-day { background: var(--travel-tint-strong) !important; color:#111; border-color:#111 !important; }
 
  /* ---- Letter PNG export preset (Forces 8.5x11 full-page fill) ---- */
-.png-letter #pageTitle { font-size: 1.5rem !important; margin-bottom: 10px !important; }
-.png-letter .legend { padding: 10px !important; margin-bottom: 15px !important; }
-.png-letter .calendar-grid { 
-  grid-template-columns: repeat(3, 1fr) !important; 
-  gap: 15px !important; 
-  height: 1000px !important; /* Forces the grid to stretch vertically */
-  align-content: space-between !important;
+.png-letter { 
+  width: 1100px !important; /* Forces a wide canvas for the 3-column grid */
+  padding: 40px !important; 
+  background: white !important;
 }
+
+.png-letter #pageTitle { font-size: 1.8rem !important; margin-bottom: 10px !important; color: #000 !important; }
+.png-letter .legend { padding: 10px !important; margin-bottom: 20px !important; }
+
+.png-letter .calendar-grid { 
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important; 
+  gap: 20px !important; 
+  width: 100% !important;
+}
+
 .png-letter .month { 
   display: flex !important; 
   flex-direction: column !important; 
-  height: 100% !important; 
+  height: 380px !important; /* Fixed height to ensure 4 rows fill the page */
   padding: 12px !important; 
-  border: 1px solid #000 !important; 
+  border: 1.5px solid #000 !important; 
 }
 .png-letter .days { flex-grow: 1; align-items: stretch; }
   /* Mobile toolbar + controls toggle */
