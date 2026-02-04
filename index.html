@@ -188,29 +188,26 @@
   .theme-poster .on-shift { background: var(--on-tint-strong) !important; color:#111; border-color:#111 !important; }
   .theme-poster .travel-day { background: var(--travel-tint-strong) !important; color:#111; border-color:#111 !important; }
 
- /* ---- Letter PNG export preset (Forces 8.5x11 full-page fill) ---- */
-.png-letter { 
-  width: 1100px !important; /* Forces a wide canvas for the 3-column grid */
-  padding: 40px !important; 
-  background: white !important;
+/* Preset A: Wall Calendar (Original working style) */
+.export-poster {
+    width: 800px !important; /* Original width that worked */
+    padding: 20px !important;
+    background: white !important;
 }
 
-.png-letter #pageTitle { font-size: 1.8rem !important; margin-bottom: 10px !important; color: #000 !important; }
-.png-letter .legend { padding: 10px !important; margin-bottom: 20px !important; }
-
-.png-letter .calendar-grid { 
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important; 
-  gap: 20px !important; 
-  width: 100% !important;
+/* Preset B: 8.5x11 Letter (Full page fill) */
+.export-letter {
+    width: 1100px !important;
+    height: 1424px !important;
+    padding: 40px !important;
+    background: white !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
-
-.png-letter .month { 
-  display: flex !important; 
-  flex-direction: column !important; 
-  height: 380px !important; /* Fixed height to ensure 4 rows fill the page */
-  padding: 12px !important; 
-  border: 1.5px solid #000 !important; 
+.export-letter .calendar-grid { 
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 15px !important;
+    flex-grow: 1 !important;
 }
 .png-letter .days { flex-grow: 1; align-items: stretch; }
   /* Mobile toolbar + controls toggle */
@@ -457,99 +454,38 @@
     saveSettings();
     requestAnimationFrame(applyAutoScale);
   }
-
-  /* ---- Letter-sized PNG export (8.5"x11" content area @300 DPI) ---- */
-  function buildCloneForLetterPNG() {
-    const liveRoot = document.getElementById('calendar-capture-root');
-    const cloneRoot = liveRoot.cloneNode(true);
-
-    // Print-friendly preset
-    cloneRoot.classList.add('png-letter');
-
-    // Remove UI only; keep title, legend, and name chip
-    cloneRoot.querySelectorAll('.controls, .mini-toolbar, .controls-toggle').forEach(el=>el.remove());
-
-    // High-contrast name chip for print
-    const chip = cloneRoot.querySelector('.name-chip');
-    if (chip) { chip.style.background='transparent'; chip.style.color='#000'; chip.style.boxShadow='none'; chip.style.padding='0'; }
-
-    // Remove autoscale transform; lay out naturally
-    const wrap = cloneRoot.querySelector('#calendar-scale-wrapper');
-    if (wrap) { wrap.style.transform='none'; wrap.style.width='100%'; }
-
-    // Ensure a 3×4 grid uses full width
-    const cal = cloneRoot.querySelector('#calendar');
-    if (cal) {
-      cal.style.display='grid';
-      cal.style.gridTemplateColumns='repeat(3, 1fr)';
-      cal.style.gap='10px';
-      cal.style.margin='0 auto';
-      cal.style.width='100%';
-      cal.style.maxWidth='100%';
-    }
-    return { cloneRoot };
-  }
-
   /**
    * Download a Letter-sized PNG that fills the printable area.
    * Includes only: Title, Name (if present), Legend, full 12-month calendar.
    * Print with same margins (default 0.25") and "Actual size" (100%).
    */
-  async function downloadCalendarImage(marginIn = 0.25, dpi = 300) {
-    const year = getSelectedYear();
-    const CSS_PPI = 96;                 // CSS pixels per inch
-    const PAGE_IN_W = 8.5, PAGE_IN_H = 11;
+    async function downloadCalendarImage() {
+  // Use the main capture root defined in your HTML
+  const container = document.getElementById('calendar-capture-root'); 
+  const style = document.getElementById('layoutStyle').value; 
+  
+  // Apply the specific preset that worked for each style
+  const exportClass = (style === 'poster-board') ? 'export-letter' : 'export-poster';
+  container.classList.add(exportClass);
 
-    // Content box (inside margins) in CSS px
-    const contentCssW = Math.round((PAGE_IN_W - 2 * marginIn) * CSS_PPI);
-    const contentCssH = Math.round((PAGE_IN_H - 2 * marginIn) * CSS_PPI);
-
-    const { cloneRoot } = buildCloneForLetterPNG();
-
-    // Off-screen host sized to content box
-    const fitBox = document.createElement('div');
-    fitBox.style.position='fixed'; fitBox.style.left='-99999px'; fitBox.style.top='0';
-    fitBox.style.background='#fff'; fitBox.style.width=contentCssW+'px'; fitBox.style.height=contentCssH+'px'; fitBox.style.overflow='hidden';
-
-    const inner = document.createElement('div');
-    inner.style.transformOrigin='top left';
-    inner.appendChild(cloneRoot);
-    fitBox.appendChild(inner);
-    document.body.appendChild(fitBox);
-
-    // Layout at target width
-    cloneRoot.style.width=contentCssW+'px';
-    cloneRoot.style.maxWidth=contentCssW+'px';
-
-    // Wait a frame for layout
-    await new Promise(r => requestAnimationFrame(r));
-
-    // Scale to fill height
-    const naturalH = Math.ceil(cloneRoot.scrollHeight || cloneRoot.getBoundingClientRect().height);
-    const scale = contentCssH / naturalH;
-    inner.style.transform = `scale(${scale})`;
-
-    // Render at DPI (e.g., 300)
-    const canvas = await html2canvas(fitBox, {
-      backgroundColor:'#ffffff',
-      useCORS:true,
-      width:contentCssW, height:contentCssH,
-      windowWidth:contentCssW, windowHeight:contentCssH,
-      scrollX:0, scrollY:0,
-      scale: dpi / CSS_PPI
+  try {
+    const canvas = await html2canvas(container, {
+      scale: 2, // High resolution for printing
+      useCORS: true,
+      backgroundColor: '#ffffff'
     });
 
-    // Download PNG
-    const link=document.createElement('a');
-    link.download=`Shift-Calendar-${year}-Letter.png`;
-    link.href=canvas.toDataURL('image/png');
-    document.body.appendChild(link);
+    const link = document.createElement('a');
+    link.download = `Shift-Calendar-${style}.png`;
+    link.href = canvas.toDataURL('image/png');
     link.click();
-    link.remove();
-
-    // Cleanup
-    document.body.removeChild(fitBox);
+  } catch (err) {
+    console.error("Download failed:", err);
+  } finally {
+    // REMOVE the class so your screen layout returns to normal
+    container.classList.remove('export-letter', 'export-poster');
   }
+}
 
   // Controls accordion (mobile)
   function setControlsCollapsed(collapsed){
