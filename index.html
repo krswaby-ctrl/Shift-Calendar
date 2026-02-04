@@ -269,8 +269,9 @@
       </div>
       <div class="control-group"><label for="workColor">Work</label><input type="color" id="workColor" value="#3498db" oninput="updateColors(); saveSettings()" aria-label="Work color"></div>
       <div class="control-group"><label for="travelColor">Travel</label><input type="color" id="travelColor" value="#e67e22" oninput="updateColors(); saveSettings()" aria-label="Travel color"></div>
+      <div class="control-group"><label for="textColor">Text Color</label><input type="color" id="textColor" value="#333333" oninput="updateColors(); saveSettings()"></div>
       <div class="control-group"><label for="tintStrength">Tint strength</label>
-        <input type="range" id="tintStrength" min="8" max="30" step="1" value="16" oninput="updateColors(); saveSettings();">
+        <input type="range" id="tintStrength" min="8" max="100" step="1" value="20" oninput="updateColors(); saveSettings();">
       </div>
       <div class="control-group"><label for="nameField">Name (optional)</label><input type="text" id="nameField" placeholder="e.g., Turd Ferguson" oninput="handleNameInput(); saveSettings()" maxlength="80"></div>
 
@@ -338,26 +339,28 @@
   function updateColors(){
     const onHex = workColor?.value ?? '#3498db';
     const trHex = travelColor?.value ?? '#e67e22';
+    const textHex = textColor?.value ?? '#333333';
 
     // Base % from slider (8..30 in UI)
     const basePct = parseInt(tintStrength?.value ?? '16', 10);
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
     // Derived intensities
-    const softOnPct    = clamp(basePct - 4,  5, 40);  // Clean Grid
-    const softTrPct    = clamp(basePct - 2,  5, 40);
-    const strongOnPct  = clamp(basePct + 0,  5, 40);  // Wall / Poster
-    const strongTrPct  = clamp(basePct + 2,  5, 40);
-
-    const solidOnPct   = clamp(basePct + 10, 5, 95);  // Standard (first stop)
-    const solidTrPct   = clamp(basePct + 10, 5, 95);
-
-    const auroraOnPct  = clamp(basePct + 35, 55, 95); // Aurora (first stop)
-    const auroraTrPct  = clamp(basePct + 35, 55, 95);
-
+    // Derived intensities - REWRITTEN FOR FULL RANGE
+  const softOnPct   = basePct; // Clean Grid
+  const softTrPct   = basePct; 
+  const strongOnPct = basePct; // Wall / Poster
+  const strongTrPct = basePct; 
+  
+  const solidOnPct  = basePct; // Standard (Classic)
+  const solidTrPct  = basePct; 
+  
+  const auroraOnPct = basePct; // Aurora
+  const auroraTrPct = basePct;
     // Base
     document.documentElement.style.setProperty('--on-color', onHex);
     document.documentElement.style.setProperty('--travel-color', trHex);
+    document.documentElement.style.setProperty('--text-main', textHex);
 
     // Clean Grid & Wall
     document.documentElement.style.setProperty('--on-tint-soft',       __hexToRGBA(onHex, softOnPct/100));
