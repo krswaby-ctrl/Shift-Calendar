@@ -8,86 +8,104 @@
     <style>
         :root {
             --bg-body: #1a1a1a;
-            --bg-card: #ffffff;
-            --primary: #2196F3;
-            --secondary: #FF9800;
+            --primary: #2196F3; /* Work Color */
+            --secondary: #FF9800; /* Travel Color */
+            --text-color: #000000; /* Default Font Color */
         }
 
         body {
-            font-family: sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-body);
             margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* The Main Calendar Area - This is what gets downloaded */
-        #calendar-capture-root {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: fit-content;
-            max-width: 1200px;
-        }
-
+        /* The Controls Bar */
         #controls {
             background: #222;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            width: 100%;
-            max-width: 1200px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* The Calendar Area (Downloaded Section) */
+        #calendar-capture-root {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: fit-content;
+            max-width: 1200px;
+            color: var(--text-color);
         }
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
 
-        .month { border: 1px solid #ddd; border-radius: 5px; overflow: hidden; }
+        .month { border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
         .month-name { background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold; }
-        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 5px; }
-        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.9em; border-radius: 50%; margin: 2px; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 10px; text-align: center; }
         
-        /* Shift Colors */
-        .work { background-color: var(--primary); color: white; }
-        .travel { background-color: var(--secondary); color: white; }
-        .off { background-color: transparent; color: #333; }
+        .day { 
+            aspect-ratio: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600;
+            border-radius: 50%; 
+            margin: 3px; 
+        }
+        
+        /* FULL TINT STRENGTH (Solid Colors) */
+        .work { background-color: var(--primary) !important; color: white !important; }
+        .travel { background-color: var(--secondary) !important; color: white !important; }
+        .off { color: var(--text-color); }
 
-        /* Hide controls when capturing PNG */
+        /* Hide buttons from PNG */
         .exporting #controls { display: none !important; }
-        
-        input, select, button { padding: 10px; border-radius: 5px; border: none; }
-        button { cursor: pointer; font-weight: bold; }
+
+        input, select, button { padding: 8px; border-radius: 4px; border: 1px solid #444; }
+        button { cursor: pointer; background: #2196F3; color: white; border: none; font-weight: bold; }
+        label { color: white; font-size: 0.8em; align-self: center; }
     </style>
 </head>
 <body>
 
     <div id="controls">
-        <input type="text" id="userName" placeholder="Enter Name" value="North Slope Shift Calendar">
+        <input type="text" id="userName" value="North Slope Shift Calendar">
         <input type="date" id="startDate" value="2024-01-02">
-        <select id="layoutStyle">
-            <option value="wall">Wall Calendar</option>
-            <option value="poster-board">Letter (8.5x11)</option>
-        </select>
-        <button onclick="generateCalendar()" style="background:#2ecc71; color:white;">Update</button>
-        <button onclick="downloadCalendarImage()" style="background:#3498db; color:white;">Download Image</button>
+        
+        <label>Font Color:</label>
+        <input type="color" id="fontPicker" value="#000000" onchange="updateColors()">
+        
+        <button onclick="generateCalendar()" style="background:#2ecc71;">Update</button>
+        <button onclick="downloadCalendarImage()" style="background:#3498db;">Download Image</button>
     </div>
 
     <div id="calendar-capture-root">
-        <h1 id="titleDisplay" style="margin-top:0;">North Slope Shift Calendar</h1>
-        <div style="margin-bottom:20px;">
+        <h1 id="titleDisplay" style="margin: 0 0 10px 0;">North Slope Shift Calendar</h1>
+        <div style="margin-bottom: 20px; font-weight: bold;">
             <span style="margin-right:15px;"><span style="color:var(--primary)">●</span> Work</span>
             <span style="margin-right:15px;"><span style="color:var(--secondary)">●</span> Travel</span>
-            <span><span style="border:1px solid #ccc; border-radius:50%; width:10px; height:10px; display:inline-block;"></span> Off</span>
+            <span><span style="color:#ccc">○</span> Off</span>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
     <script>
+        function updateColors() {
+            const color = document.getElementById('fontPicker').value;
+            document.documentElement.style.setProperty('--text-color', color);
+        }
+
         function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
             const startStr = document.getElementById('startDate').value;
@@ -101,51 +119,5 @@
             for (let m = 0; m < 12; m++) {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month';
-                const date = new Date(year, m, 1);
-                const monthName = date.toLocaleString('default', { month: 'long' });
-                
-                monthDiv.innerHTML = `<div class="month-name">${monthName} ${year}</div><div class="days-grid"></div>`;
-                const daysGrid = monthDiv.querySelector('.days-grid');
-
-                // Padding for start of month
-                for (let i = 0; i < date.getDay(); i++) daysGrid.innerHTML += '<div></div>';
-
-                const daysInMonth = new Date(year, m + 1, 0).getDate();
-                for (let d = 1; d <= daysInMonth; d++) {
-                    const current = new Date(year, m, d);
-                    const diff = Math.floor((current - startDate) / (1000 * 60 * 60 * 24));
-                    const cycleDay = ((diff % 28) + 28) % 28;
-
-                    let type = 'off';
-                    if (cycleDay === 0 || cycleDay === 14) type = 'travel';
-                    else if (cycleDay < 14) type = 'work';
-
-                    daysGrid.innerHTML += `<div class="day ${type}">${d}</div>`;
-                }
-                grid.appendChild(monthDiv);
-            }
-        }
-
-        async function downloadCalendarImage() {
-            const container = document.getElementById('calendar-capture-root');
-            document.body.classList.add('exporting');
-            
-            const canvas = await html2canvas(container, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff'
-            });
-
-            const link = document.createElement('a');
-            link.download = 'Shift-Calendar.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-            document.body.classList.remove('exporting');
-        }
-
-        // Run on load
-        generateCalendar();
-    </script>
-</body>
-</html>
+                const firstDay = new Date(year, m, 1);
+                const monthName = firstDay.toLocaleString('
