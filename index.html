@@ -8,9 +8,9 @@
     <style>
         :root {
             --bg-body: #1a1a1a;
-            --primary: #2196F3; /* Work Color */
-            --secondary: #FF9800; /* Travel Color */
-            --text-color: #000000; /* Default Font Color */
+            --primary: #2196F3; 
+            --secondary: #FF9800;
+            --text-color: #000000;
         }
 
         body {
@@ -20,21 +20,16 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* The Controls Bar */
         #controls {
             background: #222;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            max-width: 1100px;
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+            width: 100%; max-width: 1100px;
         }
 
-        /* The Calendar Area (Downloaded Section) */
+        /* ONLY this area gets captured in the PNG */
         #calendar-capture-root {
             background: white;
             padding: 40px;
@@ -46,35 +41,31 @@
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .month { border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
-        .month-name { background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold; }
-        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 10px; text-align: center; }
+        .month { border: 1px solid #eee; border-radius: 8px; overflow: hidden; padding-bottom: 10px; }
+        .month-name { background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold; margin-bottom: 5px; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 5px; text-align: center; }
+        .day-label { font-size: 0.7em; font-weight: bold; color: #999; margin-bottom: 5px; }
         
         .day { 
             aspect-ratio: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 600;
-            border-radius: 50%; 
-            margin: 3px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 600; border-radius: 50%; margin: 2px; 
         }
         
-        /* FULL TINT STRENGTH (Solid Colors) */
+        /* FULL TINT STRENGTH */
         .work { background-color: var(--primary) !important; color: white !important; }
         .travel { background-color: var(--secondary) !important; color: white !important; }
         .off { color: var(--text-color); }
 
-        /* Hide buttons from PNG */
         .exporting #controls { display: none !important; }
 
-        input, select, button { padding: 8px; border-radius: 4px; border: 1px solid #444; }
-        button { cursor: pointer; background: #2196F3; color: white; border: none; font-weight: bold; }
         label { color: white; font-size: 0.8em; align-self: center; }
+        input, button { padding: 8px; border-radius: 4px; border: none; }
+        button { cursor: pointer; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
@@ -82,10 +73,8 @@
     <div id="controls">
         <input type="text" id="userName" value="North Slope Shift Calendar">
         <input type="date" id="startDate" value="2024-01-02">
-        
         <label>Font Color:</label>
         <input type="color" id="fontPicker" value="#000000" onchange="updateColors()">
-        
         <button onclick="generateCalendar()" style="background:#2ecc71;">Update</button>
         <button onclick="downloadCalendarImage()" style="background:#3498db;">Download Image</button>
     </div>
@@ -102,22 +91,60 @@
 
     <script>
         function updateColors() {
-            const color = document.getElementById('fontPicker').value;
-            document.documentElement.style.setProperty('--text-color', color);
+            document.documentElement.style.setProperty('--text-color', document.getElementById('fontPicker').value);
         }
 
         function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
-            const startStr = document.getElementById('startDate').value;
-            const title = document.getElementById('userName').value;
-            document.getElementById('titleDisplay').innerText = title;
+            const startVal = document.getElementById('startDate').value;
+            document.getElementById('titleDisplay').innerText = document.getElementById('userName').value;
             
             grid.innerHTML = '';
-            const startDate = new Date(startStr + 'T00:00:00');
+            const startDate = new Date(startVal + 'T00:00:00');
             const year = startDate.getFullYear();
+            const daysShort = ['S','M','T','W','T','F','S'];
 
             for (let m = 0; m < 12; m++) {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month';
                 const firstDay = new Date(year, m, 1);
-                const monthName = firstDay.toLocaleString('
+                const monthName = firstDay.toLocaleString('default', { month: 'long' });
+                
+                let html = `<div class="month-name">${monthName} ${year}</div><div class="days-grid">`;
+                daysShort.forEach(d => html += `<div class="day-label">${d}</div>`);
+
+                for (let i = 0; i < firstDay.getDay(); i++) html += '<div></div>';
+
+                const daysInMonth = new Date(year, m + 1, 0).getDate();
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const current = new Date(year, m, d);
+                    const diff = Math.floor((current - startDate) / 86400000);
+                    const cycleDay = ((diff % 28) + 28) % 28;
+
+                    let type = 'off';
+                    if (cycleDay === 0 || cycleDay === 14) type = 'travel';
+                    else if (cycleDay < 14) type = 'work';
+
+                    html += `<div class="day ${type}">${d}</div>`;
+                }
+                html += `</div>`;
+                monthDiv.innerHTML = html;
+                grid.appendChild(monthDiv);
+            }
+        }
+
+        async function downloadCalendarImage() {
+            const container = document.getElementById('calendar-capture-root');
+            document.body.classList.add('exporting');
+            const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            const link = document.createElement('a');
+            link.download = 'Shift-Calendar.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            document.body.classList.remove('exporting');
+        }
+
+        generateCalendar();
+    </script>
+</body>
+</html>
